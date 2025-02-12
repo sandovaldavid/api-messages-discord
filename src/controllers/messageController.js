@@ -1,6 +1,7 @@
 import Message from '../models/Message.js';
 import { APIError, NotFoundError } from '../middleware/errorHandler.js';
 import logger from '../utils/logger.js';
+import discordService from '../services/discordService.js';
 
 export const createMessage = async (req, res, next) => {
 	try {
@@ -26,9 +27,31 @@ export const createMessage = async (req, res, next) => {
 
 		logger.info(`Message created with ID: ${message._id}`);
 
+		if (date <= new Date()) {
+			try {
+				const sentMessageId = await discordService.sendMessage(
+					message.channelId,
+					message.content
+				);
+
+				await message.markAsSent();
+				logger.info(
+					`Message ${message._id} sent immediately with Discord message id: ${sentMessageId}`
+				);
+			} catch (error) {
+				logger.error(
+					`Failed to send immediate message ${message._id}: ${error.message}`
+				);
+			}
+		}
+
 		res.status(201).json({
 			status: 'success',
-			data: message,
+			data: {
+				...message.toObject(),
+				formattedScheduledFor:
+					message.getFormattedScheduledFor('en-US'),
+			},
 		});
 	} catch (error) {
 		if (error instanceof APIError) {
