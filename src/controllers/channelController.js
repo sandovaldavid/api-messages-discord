@@ -435,7 +435,7 @@ export const syncChannels = async (req, res, next) => {
 export const updateChannelStatus = async (req, res, next) => {
 	try {
 		const { channelId } = req.params;
-		const { isActive } = req.body;
+		const { isActive, action = 'hide' } = req.body;
 
 		if (isActive === undefined) {
 			throw new APIError('isActive status is required', 400);
@@ -447,6 +447,25 @@ export const updateChannelStatus = async (req, res, next) => {
 
 		if (!channelFromDiscord) {
 			throw new NotFoundError('Channel');
+		}
+
+		let discordUpdateResult;
+		if (!isActive) {
+			if (action === 'archive') {
+				discordUpdateResult = await discordService.archiveChannel(
+					channelId
+				);
+			} else {
+				discordUpdateResult = await discordService.hideChannel(
+					channelId,
+					true
+				);
+			}
+		} else {
+			discordUpdateResult = await discordService.hideChannel(
+				channelId,
+				false
+			);
 		}
 
 		const updatedChannel = await Channel.updateChannelStatus(
@@ -518,14 +537,31 @@ export const updateChannelStatus = async (req, res, next) => {
 
 		res.status(200).json({
 			status: 'success',
-			message: 'Channel status updated',
-			data: channelInfo,
+			message: `Channel ${
+				isActive ? 'activated' : 'deactivated'
+			} and ${action}d`,
+			data: {
+				...channelInfo,
+				discord: discordUpdateResult,
+			},
 		});
 	} catch (error) {
 		if (error instanceof APIError) {
 			next(error);
+		} else if (error.code === 50013) {
+			next(
+				new DiscordError(
+					'Bot lacks required permissions: MANAGE_CHANNELS, MANAGE_ROLES'
+				)
+			);
 		} else if (error.code === 10003) {
 			next(new NotFoundError('Discord channel not found'));
+		} else if (error.message.includes('Missing Permissions')) {
+			next(
+				new DiscordError(
+					'Bot needs additional permissions to modify this channel'
+				)
+			);
 		} else {
 			logger.error(`Error updating channel status: ${error.message}`);
 			next(new APIError('Error updating channel status', 500));
