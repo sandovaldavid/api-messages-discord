@@ -1,0 +1,26 @@
+{
+  "name": "api-messages-discord",
+  "version": "1.0.0",
+  "main": "src/app.js",
+  "type": "module",
+  "engines": {
+    "node": ">=22.13.1",
+    "bun": ">=1.2.0"
+  },
+  "scripts": {
+    "start": "bun run src/app.js",
+    "dev": "bun --watch run src/app.js",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "discord.js": "^14.18.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "joi": "^17.13.3",
+    "mongoose": "^8.10.0",
+    "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0"
+  }
+}
