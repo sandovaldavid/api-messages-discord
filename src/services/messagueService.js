@@ -1,5 +1,5 @@
 import Message from '../models/Message.js';
-import discordClient from '../config/discord.js';
+import discordService from './discordService.js';
 import logger from '../utils/logger.js';
 
 const checkScheduledMessages = async () => {
@@ -12,7 +12,7 @@ const checkScheduledMessages = async () => {
 
 		for (const message of messages) {
 			try {
-				await discordClient.sendMessage(
+				await discordService.sendMessage(
 					message.channelId,
 					message.content
 				);
@@ -32,7 +32,7 @@ const checkScheduledMessages = async () => {
 
 const testBotConnection = async () => {
 	try {
-		await discordClient.connect();
+		await discordService.connect();
 		logger.info('Bot connected successfully');
 	} catch (error) {
 		logger.error(`Bot connection failed: ${error.message}`);
