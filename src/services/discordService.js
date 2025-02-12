@@ -36,6 +36,113 @@ class DiscordService {
 	}
 
 	// Channel Management
+	async archiveChannel(channelId) {
+		try {
+			const channel = await discordClient.client.channels.fetch(
+				channelId
+			);
+
+			if (!channel) {
+				throw new NotFoundError('Discord channel');
+			}
+
+			const botMember = channel.guild.members.me;
+			if (
+				!botMember?.permissions.has(['MANAGE_CHANNELS', 'MANAGE_ROLES'])
+			) {
+				throw new DiscordError('Bot missing required permissions');
+			}
+
+			let archivedCategory = channel.guild.channels.cache.find(
+				(c) => c.name.toLowerCase() === 'archived' && c.type === 4
+			);
+
+			if (!archivedCategory) {
+				archivedCategory = await channel.guild.channels.create({
+					name: 'Archived',
+					type: 4,
+					position: 999,
+					permissionOverwrites: [
+						{
+							id: channel.guild.roles.everyone.id,
+							deny: ['VIEW_CHANNEL'],
+						},
+					],
+				});
+			}
+
+			await channel.setParent(archivedCategory.id, {
+				lockPermissions: false,
+			});
+
+			await channel.permissionOverwrites.set([
+				{
+					id: channel.guild.roles.everyone.id,
+					deny: ['VIEW_CHANNEL', 'SEND_MESSAGES'],
+				},
+			]);
+
+			await channel.setName(`archived-${channel.name}`);
+
+			logger.info(`Channel ${channelId} has been archived`);
+
+			return {
+				id: channel.id,
+				name: channel.name,
+				type: channel.type,
+				archived: true,
+				categoryId: archivedCategory.id,
+			};
+		} catch (error) {
+			logger.error(`Failed to archive channel: ${error.message}`);
+			throw new DiscordError(
+				`Failed to archive channel: ${error.message}`
+			);
+		}
+	}
+
+	async hideChannel(channelId, hidden = true) {
+		try {
+			const channel = await discordClient.client.channels.fetch(
+				channelId
+			);
+			if (!channel) {
+				throw new NotFoundError('Discord channel');
+			}
+
+			const botMember = channel.guild.members.me;
+			if (
+				!botMember?.permissions.has(['MANAGE_CHANNELS', 'MANAGE_ROLES'])
+			) {
+				throw new DiscordError('Bot missing required permissions');
+			}
+
+			const everyoneRole = channel.guild.roles.everyone;
+
+			await channel.permissionOverwrites.edit(everyoneRole, {
+				VIEW_CHANNEL: !hidden,
+				SEND_MESSAGES: !hidden,
+			});
+
+			logger.info(`Channel ${channelId} visibility set to ${!hidden}`);
+
+			return {
+				id: channel.id,
+				name: channel.name,
+				type: channel.type,
+				hidden: hidden,
+				visible: !hidden,
+			};
+		} catch (error) {
+			logger.error(
+				`Failed to update channel visibility: ${error.message}`
+			);
+			throw new DiscordError(
+				`Failed to update channel visibility: ${error.message}`
+			);
+		}
+	}
+
 	async getChannelInfo(channelId) {
 		try {
 			const channel = await discordClient.client.channels.fetch(
