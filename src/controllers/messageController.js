@@ -231,9 +231,25 @@ export const getMessage = async (req, res, next) => {
 			throw new NotFoundError('Message');
 		}
 
+		let channelInfo = {};
+		try {
+			channelInfo = await discordService.getChannelInfo(
+				message.channelId
+			);
+		} catch (error) {
+			logger.error(
+				`Error fetching channel info for message ${message._id}: ${error.message}`
+			);
+		}
+
 		res.status(200).json({
 			status: 'success',
-			data: message,
+			data: {
+				...message.toObject(),
+				formattedScheduledFor:
+					message.getFormattedScheduledFor('en-US'),
+				channelInfo,
+			},
 		});
 	} catch (error) {
 		if (error instanceof APIError) {
