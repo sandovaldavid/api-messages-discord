@@ -10,7 +10,8 @@
   "scripts": {
     "start": "bun run src/app.js",
     "dev": "bun --watch run src/app.js",
-    "test": "bun test"
+    "test": "bun test",
+    "generate-key": "node -e \"import('./src/middleware/auth.js').then(auth => console.log(auth.generateApiKey()))\""
   },
   "dependencies": {
     "discord.js": "^14.18.0",
