@@ -7,6 +7,11 @@ import discordService from '../services/discordService.js';
 import Channel from '../models/channel.js';
 import logger from '../utils/logger.js';
 
+// Settings for retrying operations
+const RETRY_ATTEMPTS = 3;
+const RETRY_DELAY = 1000; // 1 second between retries
+const RATE_LIMIT_DELAY = 500; // 500ms between requests
+
 export const getChannels = async (req, res, next) => {
 	try {
 		const channels = [];
@@ -114,8 +119,42 @@ export const getChannelsByGuild = async (req, res, next) => {
 	}
 };
 
+const validateChannel = (channel) => {
+	if (!channel.channelId || typeof channel.channelId !== 'string') {
+		throw new APIError('Invalid channel ID');
+	}
+	if (!channel.name || typeof channel.name !== 'string') {
+		throw new APIError('Invalid channel name');
+	}
+	if (!channel.guildId || typeof channel.guildId !== 'string') {
+		throw new APIError('Invalid guild ID');
+	}
+	if (typeof channel.type !== 'number') {
+		throw new APIError('Invalid channel type');
+	}
+	return true;
+};
+
+const retryOperation = async (operation, attempts = RETRY_ATTEMPTS) => {
+	for (let i = 0; i < attempts; i++) {
+		try {
+			return await operation();
+		} catch (error) {
+			if (i === attempts - 1) throw error;
+			await new Promise((resolve) =>
+				setTimeout(resolve, RETRY_DELAY * (i + 1))
+			);
+			logger.warn(`Retry attempt ${i + 1} of ${attempts}`);
+		}
+	}
+};
+
 export const syncChannels = async (req, res, next) => {
 	try {
+		const chunkSize = parseInt(process.env.CHUNK_SIZE) || 100;
+		let progress = 0;
+		let totalChannels = 0;
+
 		const guilds = await discordService.getGuildInfo();
 
 		if (!guilds || guilds.length === 0) {
@@ -126,18 +165,36 @@ export const syncChannels = async (req, res, next) => {
 
 		for (const guild of guilds) {
 			try {
-				const guildChannels = await discordService.getAllGuildChannels(
-					guild.id
-				);
-				channels.push(
-					...guildChannels.map((channel) => ({
-						channelId: channel.id,
-						name: channel.name,
-						guildId: guild.id,
-						guildName: guild.name,
-						type: channel.type,
-					}))
-				);
+				await retryOperation(async () => {
+					const guildChannels =
+						await discordService.getAllGuildChannels(guild.id);
+
+					// Validar cada canal antes de agregarlo
+					const validChannels = guildChannels
+						.map((channel) => ({
+							channelId: channel.id,
+							name: channel.name,
+							guildId: guild.id,
+							guildName: guild.name,
+							type: channel.type,
+						}))
+						.filter((channel) => {
+							try {
+								return validateChannel(channel);
+							} catch (error) {
+								logger.warn(
+									`Invalid channel data: ${error.message}`
+								);
+								return false;
+							}
+						});
+
+					channels.push(...validChannels);
+
+					await new Promise((resolve) =>
+						setTimeout(resolve, RATE_LIMIT_DELAY)
+					);
+				});
 			} catch (guildError) {
 				logger.error(
 					`Error fetching channels for guild ${guild.name}: ${guildError.message}`
@@ -150,7 +207,7 @@ export const syncChannels = async (req, res, next) => {
 			throw new NotFoundError('Text channels');
 		}
 
-		const chunkSize = process.env.DB_CHUNK_SIZE || 1000;
+		totalChannels = channels.length;
 		const chunkedOperations = [];
 
 		for (let i = 0; i < channels.length; i += chunkSize) {
@@ -164,40 +221,56 @@ export const syncChannels = async (req, res, next) => {
 			chunkedOperations.push(chunk);
 		}
 
-		try {
-			let totalModified = 0;
-			let totalMatched = 0;
-			let totalUpserted = 0;
+		let totalModified = 0;
+		let totalMatched = 0;
+		let totalUpserted = 0;
 
-			for (const operationsChunk of chunkedOperations) {
-				const result = await Channel.bulkWrite(operationsChunk, {
-					ordered: false,
-					wtimeout: 30000,
+		for (const [index, operationsChunk] of chunkedOperations.entries()) {
+			try {
+				await retryOperation(async () => {
+					const result = await Channel.bulkWrite(operationsChunk, {
+						ordered: false,
+						wtimeout: 30000,
+					});
+
+					totalMatched += result.matchedCount;
+					totalModified += result.modifiedCount;
+					totalUpserted += result.upsertedCount;
+
+					progress = Math.round(
+						(((index + 1) * chunkSize) / totalChannels) * 100
+					);
+					logger.info(
+						`Sync progress: ${progress}% (${
+							(index + 1) * chunkSize
+						}/${totalChannels})`
+					);
 				});
-
-				totalMatched += result.matchedCount;
-				totalModified += result.modifiedCount;
-				totalUpserted += result.upsertedCount;
+			} catch (chunkError) {
+				logger.error(
+					`Error processing chunk ${index + 1}: ${chunkError.message}`
+				);
+				throw new APIError(`Failed to process chunk ${index + 1}`);
 			}
 
-			logger.info(
-				`Successfully synchronized ${channels.length} channels`
+			await new Promise((resolve) =>
+				setTimeout(resolve, RATE_LIMIT_DELAY)
 			);
-
-			res.status(200).json({
-				status: 'success',
-				message: `${channels.length} channels synchronized`,
-				results: channels.length,
-				details: {
-					matched: totalMatched,
-					modified: totalModified,
-					upserted: totalUpserted,
-				},
-			});
-		} catch (dbError) {
-			logger.error('Error during channel synchronization:', dbError);
-			throw new APIError('Failed to synchronize channels', 500);
 		}
+
+		logger.info(`Successfully synchronized ${totalChannels} channels`);
+
+		res.status(200).json({
+			status: 'success',
+			message: `${totalChannels} channels synchronized`,
+			results: totalChannels,
+			details: {
+				matched: totalMatched,
+				modified: totalModified,
+				upserted: totalUpserted,
+				progress: '100%',
+			},
+		});
 	} catch (error) {
 		if (error instanceof APIError) {
 			next(error);
