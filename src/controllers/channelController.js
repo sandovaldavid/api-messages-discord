@@ -150,7 +150,7 @@ export const syncChannels = async (req, res, next) => {
 			throw new NotFoundError('Text channels');
 		}
 
-		const chunkSize = 100;
+		const chunkSize = process.env.DB_CHUNK_SIZE || 1000;
 		const chunkedOperations = [];
 
 		for (let i = 0; i < channels.length; i += chunkSize) {
