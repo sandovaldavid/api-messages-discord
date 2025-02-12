@@ -2,41 +2,32 @@ import express from 'express';
 import dotenv from 'dotenv';
 import logger from './utils/logger.js';
 import connectDB from './config/database.js';
+import discordClient from './config/discord.js';
+import messageRoutes from './routes/messageRoutes.js';
 import { errorHandler, APIError } from './middleware/errorHandler.js';
+import { testBotConnection } from './services/messagueService.js';
 
 dotenv.config();
 
-// MongoDB connection
+// Mongo Db connection and Discord client connection
 connectDB();
+testBotConnection();
+discordClient.connect();
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Middleware para loggear peticiones HTTP
-app.use((req, res, next) => {
-	const start = Date.now();
-
-	app.set('trust proxy', true);
-
-	res.on('finish', () => {
-		const responseTime = Date.now() - start;
-		logger.http(req, res, responseTime);
-	});
-
-	next();
-});
-
+// Middleware
 app.use(express.json());
 
-app.get('/api/', (req, res) => {
-	res.json({ message: 'Discord Messages API' });
-});
+// Routes
+app.use('/api/messages', messageRoutes);
 
+// Error handling
 app.all('*', (req, res, next) => {
 	next(new APIError(`Can't find ${req.originalUrl} on this server!`, 404));
 });
 
-// Middleware de manejo de errores
 app.use(errorHandler);
 
 app.listen(port, () => {
