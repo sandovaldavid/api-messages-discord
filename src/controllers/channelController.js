@@ -185,19 +185,65 @@ export const getChannelsByGuild = async (req, res, next) => {
 			throw new APIError('Guild ID is required', 400);
 		}
 
-		const guildChannels = await discordService.getAllGuildChannels(guildId);
-		const guildInfo = await discordService.getGuildInfo(guildId);
+		const [guildChannels, guildInfo] = await Promise.all([
+			retryOperation(async () => {
+				return await discordService.getAllGuildChannels(guildId);
+			}),
+			retryOperation(async () => {
+				return await discordService.getGuildInfo(guildId);
+			}),
+		]);
 
-		const channels = guildChannels.map((channel) => ({
-			...channel,
-			guildName: guildInfo.name,
-			guildId: guildInfo.id,
-		}));
+		const validChannels = guildChannels
+			.map((channel) => ({
+				channelId: channel.id,
+				name: channel.name,
+				guildId: guildInfo.id,
+				guildName: guildInfo.name,
+				type: channel.type,
+				isActive: true,
+			}))
+			.filter((channel) => {
+				try {
+					return validateChannel(channel);
+				} catch (error) {
+					logger.warn(`Invalid channel data: ${error.message}`);
+					return false;
+				}
+			});
+
+		const formattedChannels = validChannels.map((channelData) => {
+			const channel = new Channel(channelData);
+			return {
+				...channel.toAPI(),
+				types: {
+					isText: channel.isTextChannel(),
+					isVoice: channel.isVoiceChannel(),
+					isCategory: channel.isCategoryChannel(),
+					isNews: channel.isNewsChannel(),
+					typeLabel: channel.getChannelType(),
+				},
+				displayName: channel.displayName,
+			};
+		});
+
+		formattedChannels.sort((a, b) => a.name.localeCompare(b.name));
+
+		logger.info(
+			`Retrieved ${formattedChannels.length} channels for guild ${guildInfo.name}`
+		);
 
 		res.status(200).json({
 			status: 'success',
-			results: channels.length,
-			data: channels,
+			results: formattedChannels.length,
+			data: {
+				guild: {
+					id: guildInfo.id,
+					name: guildInfo.name,
+					memberCount: guildInfo.memberCount,
+				},
+				channels: formattedChannels,
+			},
 		});
 	} catch (error) {
 		if (error instanceof APIError) {
