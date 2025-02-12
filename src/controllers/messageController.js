@@ -313,10 +313,32 @@ export const getSentMessages = async (req, res, next) => {
 			.sort({ scheduledFor: 'desc' })
 			.select('-__v');
 
+		const enrichedMessages = await Promise.all(
+			messages.map(async (message) => {
+				let channelInfo = {};
+				try {
+					channelInfo = await discordService.getChannelInfo(
+						message.channelId
+					);
+				} catch (error) {
+					logger.error(
+						`Error fetching channel info for message ${message._id}: ${error.message}`
+					);
+				}
+
+				return {
+					...message.toObject(),
+					formattedScheduledFor:
+						message.getFormattedScheduledFor('en-US'),
+					channelInfo,
+				};
+			})
+		);
+
 		res.status(200).json({
 			status: 'success',
-			results: messages.length,
-			data: messages,
+			results: enrichedMessages.length,
+			data: enrichedMessages,
 		});
 	} catch (error) {
 		logger.error(`Error fetching sent messages: ${error.message}`);
