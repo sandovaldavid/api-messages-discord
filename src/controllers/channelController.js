@@ -112,7 +112,54 @@ export const getChannelById = async (req, res, next) => {
 			throw new APIError('Channel ID is required', 400);
 		}
 
-		const channelInfo = await discordService.getChannelInfo(channelId);
+		let channel = await Channel.findOne({ channelId });
+
+		const channelFromDiscord = await retryOperation(async () => {
+			return await discordService.getChannelInfo(channelId);
+		});
+
+		if (!channelFromDiscord) {
+			throw new NotFoundError('Channel');
+		}
+
+		const channelData = {
+			channelId: channelFromDiscord.id,
+			name: channelFromDiscord.name,
+			guildId: channelFromDiscord.guildId,
+			guildName: channelFromDiscord.guildName,
+			type: channelFromDiscord.type,
+			isActive: channel ? channel.isActive : true,
+		};
+
+		if (channel) {
+			Object.assign(channel, channelData);
+			await channel.save();
+		} else {
+			channel = new Channel(channelData);
+			await channel.save();
+		}
+
+		const channelInfo = {
+			...channel.toAPI(),
+			types: {
+				isText: channel.isTextChannel(),
+				isVoice: channel.isVoiceChannel(),
+				isCategory: channel.isCategoryChannel(),
+				isNews: channel.isNewsChannel(),
+				typeLabel: channel.getChannelType(),
+			},
+			displayName: channel.displayName,
+			status: {
+				isActive: channel.isActive,
+				isInactive: channel.isInactive,
+			},
+			timestamps: {
+				createdAt: channel.createdAt,
+				updatedAt: channel.updatedAt,
+			},
+		};
+
+		logger.info(`Channel ${channelId} details retrieved successfully`);
 
 		res.status(200).json({
 			status: 'success',
@@ -124,8 +171,8 @@ export const getChannelById = async (req, res, next) => {
 		} else if (error.code === 10003) {
 			next(new NotFoundError('Channel'));
 		} else {
-			logger.error(`Discord API Error: ${error.message}`);
-			next(new DiscordError(error.message));
+			logger.error(`Error fetching channel: ${error.message}`);
+			next(new DiscordError('Error fetching channel details'));
 		}
 	}
 };
