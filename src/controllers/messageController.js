@@ -122,7 +122,23 @@ export const deleteMessage = async (req, res, next) => {
 			throw new APIError('Cannot delete already sent message', 400);
 		}
 
-		await Message.findByIdAndDelete(req.params.id);
+		// Notify cancellation to Discord by sending a cancellation message.
+		// This integration uses the discordService function.
+		try {
+			await discordService.sendMessage(
+				message.channelId,
+				`Scheduled message was cancelled: ${message.content}`
+			);
+			logger.info(
+				`Cancellation notification sent for message ${req.params.id}`
+			);
+		} catch (error) {
+			logger.warn(
+				`Failed to send cancellation notification: ${error.message}`
+			);
+		}
+
+		await message.remove();
 		logger.info(`Message deleted with ID: ${req.params.id}`);
 
 		res.status(204).json({
