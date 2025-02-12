@@ -76,13 +76,23 @@ class DiscordService {
 	// Guild Management
 	async getGuildInfo(guildId) {
 		try {
-			const guild = await discordClient.client.guilds.fetch(guildId);
-			return {
+			if (guildId) {
+				const guild = await discordClient.client.guilds.fetch(guildId);
+				return {
+					id: guild.id,
+					name: guild.name,
+					memberCount: guild.memberCount,
+					owner: guild.ownerId,
+				};
+			}
+
+			const guilds = await discordClient.client.guilds.fetch();
+			return Array.from(guilds.values()).map((guild) => ({
 				id: guild.id,
 				name: guild.name,
 				memberCount: guild.memberCount,
 				owner: guild.ownerId,
-			};
+			}));
 		} catch (error) {
 			throw new DiscordError(
 				`Failed to fetch guild info: ${error.message}`
