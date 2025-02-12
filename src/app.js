@@ -4,6 +4,7 @@ import logger from './utils/logger.js';
 import connectDB from './config/database.js';
 import discordClient from './config/discord.js';
 import messageRoutes from './routes/messageRoutes.js';
+import channelRoutes from './routes/channelRoutes.js';
 import { errorHandler, APIError } from './middleware/errorHandler.js';
 import { testBotConnection } from './services/messagueService.js';
 
@@ -22,6 +23,7 @@ app.use(express.json());
 
 // Routes
 app.use('/api/messages', messageRoutes);
+app.use('/api/channels', channelRoutes);
 
 // Error handling
 app.all('*', (req, res, next) => {
