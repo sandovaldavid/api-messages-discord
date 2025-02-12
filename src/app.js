@@ -7,6 +7,8 @@ import messageRoutes from './routes/messageRoutes.js';
 import channelRoutes from './routes/channelRoutes.js';
 import { errorHandler, APIError } from './middleware/errorHandler.js';
 import { testBotConnection } from './services/messagueService.js';
+import swaggerUi from 'swagger-ui-express';
+import { specs } from './config/swagger.js';
 
 dotenv.config();
 
@@ -21,6 +23,9 @@ const port = process.env.PORT || 3000;
 // Habilitar confianza en proxies
 app.enable('trust proxy');
 app.set('trust proxy', true);
+
+// Swagger docs
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 // Middleware para logging HTTP
 app.use((req, res, next) => {
