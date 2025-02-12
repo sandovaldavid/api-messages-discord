@@ -9,6 +9,7 @@ import logger from '../utils/logger.js';
 export const getChannels = async (req, res, next) => {
 	try {
 		const guilds = await discordClient.client.guilds.fetch();
+		logger.info(`Found ${guilds.size} guilds`);
 
 		if (!guilds || guilds.size === 0) {
 			throw new DiscordError('No Discord servers found');
@@ -16,11 +17,26 @@ export const getChannels = async (req, res, next) => {
 
 		const channels = [];
 
-		for (const [, guild] of guilds) {
+		for (const [id, partialGuild] of guilds) {
 			try {
+				// Fetch the complete guild first
+				const guild = await partialGuild.fetch();
+
+				// Then fetch its channels
 				const guildChannels = await guild.channels.fetch();
+				logger.info(
+					`Found ${guildChannels.size} channels in guild ${guild.name}`
+				);
+
 				const textChannels = guildChannels.filter(
-					(channel) => channel.type === 0
+					(channel) =>
+						channel?.type === 0 ||
+						channel?.type === 'GUILD_TEXT' ||
+						channel?.type === 'DM'
+				);
+
+				logger.info(
+					`Found ${textChannels.size} text channels in guild ${guild.name}`
 				);
 
 				channels.push(
@@ -29,11 +45,12 @@ export const getChannels = async (req, res, next) => {
 						name: channel.name,
 						guildName: guild.name,
 						type: channel.type,
+						guildId: guild.id,
 					}))
 				);
 			} catch (guildError) {
 				logger.error(
-					`Error fetching channels for guild ${guild.name}: ${guildError.message}`
+					`Error fetching channels for guild: ${guildError.message}`
 				);
 				continue;
 			}
