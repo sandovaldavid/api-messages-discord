@@ -184,11 +184,32 @@ export const updateMessage = async (req, res, next) => {
 		if (channelId) message.channelId = channelId;
 
 		await message.save();
-		logger.info(`Message updated with ID: ${message._id}`);
 
+		if (message.scheduledFor <= new Date()) {
+			try {
+				const sentMessageId = await discordService.sendMessage(
+					message.channelId,
+					message.content
+				);
+				await message.markAsSent();
+				logger.info(
+					`Message ${message._id} sent with Discord message id: ${sentMessageId}`
+				);
+			} catch (error) {
+				logger.error(
+					`Failed to send updated message ${message._id}: ${error.message}`
+				);
+			}
+		}
+
+		logger.info(`Message updated with ID: ${message._id}`);
 		res.status(200).json({
 			status: 'success',
-			data: message,
+			data: {
+				...message.toObject(),
+				formattedScheduledFor:
+					message.getFormattedScheduledFor('en-US'),
+			},
 		});
 	} catch (error) {
 		if (error instanceof APIError) {
