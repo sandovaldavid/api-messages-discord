@@ -314,3 +314,15 @@ export const updateChannelStatus = async (req, res, next) => {
 		}
 	}
 };
+
+export const getTextChannels = async (req, res, next) => {
+	try {
+		const textChannels = await Channel.findTextChannels();
+		res.status(200).json({
+			status: 'success',
+			data: textChannels.map((channel) => channel.toAPI()),
+		});
+	} catch (error) {
+		next(error);
+	}
+};
