@@ -81,6 +81,12 @@ const logger = winston.createLogger({
 logger.http = (req, res, responseTime) => {
 	const route = req.route ? req.route.path : '';
 	const error = res.locals.error || '';
+	const ip =
+		req.headers['x-forwarded-for'] ||
+		req.headers['x-real-ip'] ||
+		req.ip ||
+		req.connection.remoteAddress ||
+		'127.0.0.1';
 
 	logger.log({
 		level: 'http',
@@ -88,7 +94,7 @@ logger.http = (req, res, responseTime) => {
 		url: req.originalUrl || req.url,
 		status: res.statusCode,
 		responseTime,
-		ip: req.ip || req.connection.remoteAddress,
+		ip: ip.split(',')[0],
 		userAgent: req.get('user-agent') || '-',
 		route,
 		error,
