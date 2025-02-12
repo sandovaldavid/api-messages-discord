@@ -441,24 +441,91 @@ export const updateChannelStatus = async (req, res, next) => {
 			throw new APIError('isActive status is required', 400);
 		}
 
-		const channel = await Channel.findOne({ channelId });
+		const channelFromDiscord = await retryOperation(async () => {
+			return await discordService.getChannelInfo(channelId);
+		});
 
-		if (!channel) {
+		if (!channelFromDiscord) {
 			throw new NotFoundError('Channel');
 		}
 
-		channel.isActive = isActive;
-		await channel.save();
+		const updatedChannel = await Channel.updateChannelStatus(
+			channelId,
+			isActive
+		);
+
+		if (!updatedChannel) {
+			const channelData = {
+				channelId: channelFromDiscord.id,
+				name: channelFromDiscord.name,
+				guildId: channelFromDiscord.guildId,
+				guildName: channelFromDiscord.guildName,
+				type: channelFromDiscord.type,
+				isActive: isActive,
+			};
+
+			const newChannel = new Channel(channelData);
+			await newChannel.save();
+
+			logger.info(
+				`Created new channel ${channelId} with status ${isActive}`
+			);
+
+			const channelInfo = {
+				...newChannel.toAPI(),
+				types: {
+					isText: newChannel.isTextChannel(),
+					isVoice: newChannel.isVoiceChannel(),
+					isCategory: newChannel.isCategoryChannel(),
+					isNews: newChannel.isNewsChannel(),
+					typeLabel: newChannel.getChannelType(),
+				},
+				displayName: newChannel.displayName,
+				status: {
+					isActive: newChannel.isActive,
+					isInactive: newChannel.isInactive,
+				},
+			};
+
+			return res.status(201).json({
+				status: 'success',
+				message: 'Channel created and status set',
+				data: channelInfo,
+			});
+		}
+
+		const channelInfo = {
+			...updatedChannel.toAPI(),
+			types: {
+				isText: updatedChannel.isTextChannel(),
+				isVoice: updatedChannel.isVoiceChannel(),
+				isCategory: updatedChannel.isCategoryChannel(),
+				isNews: updatedChannel.isNewsChannel(),
+				typeLabel: updatedChannel.getChannelType(),
+			},
+			displayName: updatedChannel.displayName,
+			status: {
+				isActive: updatedChannel.isActive,
+				isInactive: updatedChannel.isInactive,
+			},
+			timestamps: {
+				createdAt: updatedChannel.createdAt,
+				updatedAt: updatedChannel.updatedAt,
+			},
+		};
 
 		logger.info(`Channel ${channelId} status updated to ${isActive}`);
 
 		res.status(200).json({
 			status: 'success',
-			data: channel,
+			message: 'Channel status updated',
+			data: channelInfo,
 		});
 	} catch (error) {
 		if (error instanceof APIError) {
 			next(error);
+		} else if (error.code === 10003) {
+			next(new NotFoundError('Discord channel not found'));
 		} else {
 			logger.error(`Error updating channel status: ${error.message}`);
 			next(new APIError('Error updating channel status', 500));
