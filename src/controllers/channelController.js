@@ -292,6 +292,7 @@ export const syncChannels = async (req, res, next) => {
 		let totalChannels = 0;
 
 		const guilds = await discordService.getGuildInfo();
+		logger.info(`Found ${guilds.length} Discord servers to sync`);
 
 		if (!guilds || guilds.length === 0) {
 			throw new DiscordError('No Discord servers found');
@@ -305,7 +306,6 @@ export const syncChannels = async (req, res, next) => {
 					const guildChannels =
 						await discordService.getAllGuildChannels(guild.id);
 
-					// Validar cada canal antes de agregarlo
 					const validChannels = guildChannels
 						.map((channel) => ({
 							channelId: channel.id,
@@ -344,13 +344,21 @@ export const syncChannels = async (req, res, next) => {
 		}
 
 		totalChannels = channels.length;
-		const chunkedOperations = [];
+		logger.info(
+			`Processing ${totalChannels} channels in chunks of ${chunkSize}`
+		);
 
+		const chunkedOperations = [];
 		for (let i = 0; i < channels.length; i += chunkSize) {
 			const chunk = channels.slice(i, i + chunkSize).map((channel) => ({
 				updateOne: {
 					filter: { channelId: channel.channelId },
-					update: { $set: channel },
+					update: {
+						$set: {
+							...channel,
+							updatedAt: new Date(),
+						},
+					},
 					upsert: true,
 				},
 			}));
@@ -382,19 +390,24 @@ export const syncChannels = async (req, res, next) => {
 						}/${totalChannels})`
 					);
 				});
+
+				await new Promise((resolve) =>
+					setTimeout(resolve, RATE_LIMIT_DELAY)
+				);
 			} catch (chunkError) {
 				logger.error(
 					`Error processing chunk ${index + 1}: ${chunkError.message}`
 				);
 				throw new APIError(`Failed to process chunk ${index + 1}`);
 			}
-
-			await new Promise((resolve) =>
-				setTimeout(resolve, RATE_LIMIT_DELAY)
-			);
 		}
 
+		const activeChannels = await Channel.findActiveChannels();
+		const textChannels = await Channel.findTextChannels();
+
 		logger.info(`Successfully synchronized ${totalChannels} channels`);
+		logger.info(`Active channels: ${activeChannels.length}`);
+		logger.info(`Text channels: ${textChannels.length}`);
 
 		res.status(200).json({
 			status: 'success',
@@ -404,6 +417,8 @@ export const syncChannels = async (req, res, next) => {
 				matched: totalMatched,
 				modified: totalModified,
 				upserted: totalUpserted,
+				activeChannels: activeChannels.length,
+				textChannels: textChannels.length,
 				progress: '100%',
 			},
 		});
