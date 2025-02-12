@@ -14,37 +14,80 @@ const RATE_LIMIT_DELAY = 500; // 500ms between requests
 
 export const getChannels = async (req, res, next) => {
 	try {
-		const channels = [];
-		const guilds = await discordService.getGuildInfo();
-		logger.info(`Found ${guilds.length} guilds successfully`);
+		const { type, active, guildId } = req.query;
+		let channels = [];
 
-		if (!guilds || guilds.length === 0) {
-			throw new DiscordError('No Discord servers found');
-		}
+		if (active !== undefined) {
+			channels = await Channel.findActiveChannels();
+		} else if (type === 'text') {
+			channels = await Channel.findTextChannels();
+		} else if (guildId) {
+			channels = await Channel.findByGuild(guildId);
+		} else {
+			const guilds = await discordService.getGuildInfo();
+			logger.info(`Found ${guilds.length} guilds successfully`);
 
-		for (const guild of guilds) {
-			try {
-				const guildChannels = await discordService.getAllGuildChannels(
-					guild.id
-				);
-				channels.push(
-					...guildChannels.map((channel) => ({
-						...channel,
-						guildName: guild.name,
-						guildId: guild.id,
-					}))
-				);
-			} catch (guildError) {
-				logger.error(
-					`Error fetching channels for guild: ${guildError.message}`
-				);
-				continue;
+			if (!guilds || guilds.length === 0) {
+				throw new DiscordError('No Discord servers found');
+			}
+
+			for (const guild of guilds) {
+				try {
+					await retryOperation(async () => {
+						const guildChannels =
+							await discordService.getAllGuildChannels(guild.id);
+
+						const validChannels = guildChannels
+							.map((channel) => ({
+								channelId: channel.id,
+								name: channel.name,
+								guildId: guild.id,
+								guildName: guild.name,
+								type: channel.type,
+							}))
+							.filter((channel) => {
+								try {
+									return validateChannel(channel);
+								} catch (error) {
+									logger.warn(
+										`Invalid channel data: ${error.message}`
+									);
+									return false;
+								}
+							});
+
+						const formattedChannels = validChannels.map(
+							(channel) => {
+								const channelDoc = new Channel(channel);
+								return channelDoc.toAPI();
+							}
+						);
+
+						channels.push(...formattedChannels);
+
+						await new Promise((resolve) =>
+							setTimeout(resolve, RATE_LIMIT_DELAY)
+						);
+					});
+				} catch (guildError) {
+					logger.error(
+						`Error fetching channels for guild: ${guildError.message}`
+					);
+					continue;
+				}
 			}
 		}
 
 		if (channels.length === 0) {
 			throw new NotFoundError('Text channels');
 		}
+
+		channels.sort((a, b) => {
+			const guildCompare = a.guildName.localeCompare(b.guildName);
+			return guildCompare !== 0
+				? guildCompare
+				: a.name.localeCompare(b.name);
+		});
 
 		res.status(200).json({
 			status: 'success',
