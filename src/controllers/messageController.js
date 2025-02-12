@@ -93,3 +93,109 @@ export const deleteMessage = async (req, res, next) => {
 		}
 	}
 };
+
+export const updateMessage = async (req, res, next) => {
+	try {
+		const { content, scheduledFor, channelId } = req.body;
+		const messageId = req.params.id;
+
+		const message = await Message.findById(messageId);
+
+		if (!message) {
+			throw new NotFoundError('Message');
+		}
+
+		if (message.sent) {
+			throw new APIError('Cannot update already sent message', 400);
+		}
+
+		if (scheduledFor) {
+			const date = new Date(scheduledFor);
+			if (isNaN(date.getTime())) {
+				throw new APIError('Invalid date format', 400);
+			}
+			message.scheduledFor = date;
+		}
+
+		if (content) message.content = content;
+		if (channelId) message.channelId = channelId;
+
+		await message.save();
+		logger.info(`Message updated with ID: ${message._id}`);
+
+		res.status(200).json({
+			status: 'success',
+			data: message,
+		});
+	} catch (error) {
+		if (error instanceof APIError) {
+			next(error);
+		} else if (error.name === 'CastError') {
+			next(new APIError('Invalid message ID format', 400));
+		} else {
+			logger.error(`Error updating message: ${error.message}`);
+			next(new APIError('Error updating message', 500));
+		}
+	}
+};
+
+export const getMessage = async (req, res, next) => {
+	try {
+		const message = await Message.findById(req.params.id);
+
+		if (!message) {
+			throw new NotFoundError('Message');
+		}
+
+		res.status(200).json({
+			status: 'success',
+			data: message,
+		});
+	} catch (error) {
+		if (error instanceof APIError) {
+			next(error);
+		} else if (error.name === 'CastError') {
+			next(new APIError('Invalid message ID format', 400));
+		} else {
+			logger.error(`Error fetching message: ${error.message}`);
+			next(new APIError('Error fetching message', 500));
+		}
+	}
+};
+
+export const getPendingMessages = async (req, res, next) => {
+	try {
+		const messages = await Message.find({
+			sent: false,
+			scheduledFor: { $gt: new Date() },
+		})
+			.sort({ scheduledFor: 'asc' })
+			.select('-__v');
+
+		res.status(200).json({
+			status: 'success',
+			results: messages.length,
+			data: messages,
+		});
+	} catch (error) {
+		logger.error(`Error fetching pending messages: ${error.message}`);
+		next(new APIError('Error fetching pending messages', 500));
+	}
+};
+
+export const getSentMessages = async (req, res, next) => {
+	try {
+		const messages = await Message.find({ sent: true })
+			.sort({ scheduledFor: 'desc' })
+			.select('-__v');
+
+		res.status(200).json({
+			status: 'success',
+			results: messages.length,
+			data: messages,
+		});
+	} catch (error) {
+		logger.error(`Error fetching sent messages: ${error.message}`);
+		next(new APIError('Error fetching sent messages', 500));
+	}
+};
