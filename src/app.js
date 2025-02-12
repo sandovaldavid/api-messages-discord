@@ -18,7 +18,22 @@ discordClient.connect();
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Middleware
+// Habilitar confianza en proxies
+app.enable('trust proxy');
+app.set('trust proxy', true);
+
+// Middleware para logging HTTP
+app.use((req, res, next) => {
+	const start = Date.now();
+
+	res.on('finish', () => {
+		const responseTime = Date.now() - start;
+		logger.http(req, res, responseTime);
+	});
+
+	next();
+});
+
 app.use(express.json());
 
 // Routes
