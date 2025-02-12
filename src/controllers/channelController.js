@@ -100,6 +100,7 @@ export const getChannelById = async (req, res, next) => {
 				name: channel.name,
 				type: channel.type,
 				guildName: channel.guild.name,
+				guildId: channel.guild.id,
 			},
 		});
 	} catch (error) {
