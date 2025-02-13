@@ -13,17 +13,12 @@ const checkScheduledMessages = async () => {
 
 		for (const message of messages) {
 			try {
-				await discordService.sendMessage(
-					message.channelId,
-					message.content
-				);
+				await discordService.sendMessage(message.channelId, message.content);
 				message.sent = true;
 				await message.save();
 				logger.info(`Sent scheduled message: ${message._id}`);
 			} catch (error) {
-				logger.error(
-					`Failed to send message ${message._id}: ${error.message}`
-				);
+				logger.error(`Failed to send message ${message._id}: ${error.message}`);
 			}
 		}
 	} catch (error) {

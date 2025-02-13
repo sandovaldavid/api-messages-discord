@@ -2,8 +2,7 @@ export const channelPaths = {
 	'/api/channels': {
 		get: {
 			summary: 'Get all available channels',
-			description:
-				'Retrieves all channels with optional filtering by type and active status',
+			description: 'Retrieves all channels with optional filtering by type and active status',
 			security: [{ BearerAuth: [] }],
 			tags: ['Channels'],
 			parameters: [
@@ -60,8 +59,7 @@ export const channelPaths = {
 	'/api/channels/{channelId}': {
 		get: {
 			summary: 'Get channel by ID',
-			description:
-				'Retrieves detailed information about a specific channel',
+			description: 'Retrieves detailed information about a specific channel',
 			security: [{ BearerAuth: [] }],
 			tags: ['Channels'],
 			parameters: [
@@ -92,8 +90,7 @@ export const channelPaths = {
 												// Use the channel properties directly
 												channelId: {
 													type: 'string',
-													description:
-														'Discord channel ID',
+													description: 'Discord channel ID',
 												},
 												name: {
 													type: 'string',
@@ -101,13 +98,11 @@ export const channelPaths = {
 												},
 												guildId: {
 													type: 'string',
-													description:
-														'Discord server ID',
+													description: 'Discord server ID',
 												},
 												guildName: {
 													type: 'string',
-													description:
-														'Discord server name',
+													description: 'Discord server name',
 												},
 												type: {
 													type: 'number',
@@ -115,8 +110,7 @@ export const channelPaths = {
 												},
 												isActive: {
 													type: 'boolean',
-													description:
-														'Channel active status',
+													description: 'Channel active status',
 												},
 												types: {
 													type: 'object',
@@ -164,8 +158,7 @@ export const channelPaths = {
 	'/api/channels/sync': {
 		get: {
 			summary: 'Synchronize channels with Discord',
-			description:
-				'Synchronizes all channels from Discord with the local database',
+			description: 'Synchronizes all channels from Discord with the local database',
 			security: [{ BearerAuth: [] }],
 			tags: ['Channels'],
 			responses: {
@@ -292,8 +285,7 @@ export const channelPaths = {
 	'/api/channels/{channelId}/status': {
 		patch: {
 			summary: 'Update channel status',
-			description:
-				'Update the active status of a channel and optionally archive or hide it',
+			description: 'Update the active status of a channel and optionally archive or hide it',
 			security: [{ BearerAuth: [] }],
 			tags: ['Channels'],
 			parameters: [
@@ -320,8 +312,7 @@ export const channelPaths = {
 								action: {
 									type: 'string',
 									enum: ['hide', 'archive'],
-									description:
-										'Action to perform when deactivating',
+									description: 'Action to perform when deactivating',
 								},
 							},
 						},

@@ -1,8 +1,4 @@
-import {
-	APIError,
-	DiscordError,
-	NotFoundError,
-} from '../middleware/errorHandler.js';
+import { APIError, DiscordError, NotFoundError } from '../middleware/errorHandler.js';
 import discordService from '../services/discordService.js';
 import Guild from '../models/Guild.js';
 import Channel from '../models/channel.js';
@@ -19,21 +15,14 @@ export const getGuilds = async (req, res, next) => {
 				let guildChannels = guild.channels;
 
 				try {
-					discordData = await discordService.getGuildInfo(
-						guild.guildId
-					);
+					discordData = await discordService.getGuildInfo(guild.guildId);
 
 					if (!guildChannels || guildChannels.length === 0) {
-						const discordChannels =
-							await discordService.getAllGuildChannels(
-								guild.guildId
-							);
+						const discordChannels = await discordService.getAllGuildChannels(guild.guildId);
 						guildChannels = discordChannels;
 					}
 				} catch (error) {
-					logger.error(
-						`Error fetching Discord info for guild ${guild.guildId}: ${error.message}`
-					);
+					logger.error(`Error fetching Discord info for guild ${guild.guildId}: ${error.message}`);
 				}
 				return {
 					...guild.toObject(),
@@ -45,9 +34,7 @@ export const getGuilds = async (req, res, next) => {
 			})
 		);
 
-		logger.info(
-			`Fetched and enriched ${enrichedGuilds.length} active guilds`
-		);
+		logger.info(`Fetched and enriched ${enrichedGuilds.length} active guilds`);
 
 		res.status(200).json({
 			status: 'success',
@@ -124,8 +111,7 @@ export const syncGuilds = async (req, res, next) => {
 
 				logger.info(`Synchronized guild: ${guild.name}`);
 
-				const discordChannels =
-					await discordService.getAllGuildChannels(guildData.id);
+				const discordChannels = await discordService.getAllGuildChannels(guildData.id);
 
 				for (const channelData of discordChannels) {
 					const updatedChannel = await Channel.findOneAndUpdate(
@@ -145,11 +131,7 @@ export const syncGuilds = async (req, res, next) => {
 				}
 			} catch (error) {
 				results.failed++;
-				logger.error(
-					`Error syncing guild ${guildData?.name || 'unknown'}: ${
-						error.message
-					}`
-				);
+				logger.error(`Error syncing guild ${guildData?.name || 'unknown'}: ${error.message}`);
 				continue;
 			}
 		}

@@ -22,8 +22,7 @@ export const messageSchema = {
 			},
 			channelId: {
 				type: 'string',
-				description:
-					'Discord channel ID where the message will be sent',
+				description: 'Discord channel ID where the message will be sent',
 				example: '123456789012345678',
 			},
 			sent: {

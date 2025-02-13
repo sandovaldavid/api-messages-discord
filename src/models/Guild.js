@@ -76,9 +76,7 @@ guildSchema.pre('save', function (next) {
 
 guildSchema.methods = {
 	async addChannel(channelId) {
-		if (
-			!this.channels.some((ch) => ch.toString() === channelId.toString())
-		) {
+		if (!this.channels.some((ch) => ch.toString() === channelId.toString())) {
 			this.channels.push(channelId);
 			await this.save();
 		}
@@ -86,9 +84,7 @@ guildSchema.methods = {
 	},
 
 	async removeChannel(channelId) {
-		this.channels = this.channels.filter(
-			(ch) => ch.toString() !== channelId.toString()
-		);
+		this.channels = this.channels.filter((ch) => ch.toString() !== channelId.toString());
 		await this.save();
 		return this;
 	},
@@ -100,9 +96,7 @@ guildSchema.methods = {
 	},
 
 	getSummary() {
-		return `${this.name} - ${new Intl.NumberFormat('en-US').format(
-			this.memberCount
-		)} members`;
+		return `${this.name} - ${new Intl.NumberFormat('en-US').format(this.memberCount)} members`;
 	},
 };
 

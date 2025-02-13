@@ -6,8 +6,7 @@ class DiscordService {
 	// Message Management
 	async sendMessage(channelId, content) {
 		try {
-			const channel =
-				await discordClient.client.channels.fetch(channelId);
+			const channel = await discordClient.client.channels.fetch(channelId);
 			if (!channel) {
 				throw new NotFoundError('Discord channel');
 			}
@@ -23,8 +22,7 @@ class DiscordService {
 
 	async editMessage(channelId, messageId, newContent) {
 		try {
-			const channel =
-				await discordClient.client.channels.fetch(channelId);
+			const channel = await discordClient.client.channels.fetch(channelId);
 			const message = await channel.messages.fetch(messageId);
 			await message.edit(newContent);
 			logger.info(`Message ${messageId} edited successfully`);
@@ -36,17 +34,14 @@ class DiscordService {
 	// Channel Management
 	async archiveChannel(channelId) {
 		try {
-			const channel =
-				await discordClient.client.channels.fetch(channelId);
+			const channel = await discordClient.client.channels.fetch(channelId);
 
 			if (!channel) {
 				throw new NotFoundError('Discord channel');
 			}
 
 			const botMember = channel.guild.members.me;
-			if (
-				!botMember?.permissions.has(['MANAGE_CHANNELS', 'MANAGE_ROLES'])
-			) {
+			if (!botMember?.permissions.has(['MANAGE_CHANNELS', 'MANAGE_ROLES'])) {
 				throw new DiscordError('Bot missing required permissions');
 			}
 
@@ -92,24 +87,19 @@ class DiscordService {
 			};
 		} catch (error) {
 			logger.error(`Failed to archive channel: ${error.message}`);
-			throw new DiscordError(
-				`Failed to archive channel: ${error.message}`
-			);
+			throw new DiscordError(`Failed to archive channel: ${error.message}`);
 		}
 	}
 
 	async hideChannel(channelId, hidden = true) {
 		try {
-			const channel =
-				await discordClient.client.channels.fetch(channelId);
+			const channel = await discordClient.client.channels.fetch(channelId);
 			if (!channel) {
 				throw new NotFoundError('Discord channel');
 			}
 
 			const botMember = channel.guild.members.me;
-			if (
-				!botMember?.permissions.has(['MANAGE_CHANNELS', 'MANAGE_ROLES'])
-			) {
+			if (!botMember?.permissions.has(['MANAGE_CHANNELS', 'MANAGE_ROLES'])) {
 				throw new DiscordError('Bot missing required permissions');
 			}
 
@@ -130,19 +120,14 @@ class DiscordService {
 				visible: !hidden,
 			};
 		} catch (error) {
-			logger.error(
-				`Failed to update channel visibility: ${error.message}`
-			);
-			throw new DiscordError(
-				`Failed to update channel visibility: ${error.message}`
-			);
+			logger.error(`Failed to update channel visibility: ${error.message}`);
+			throw new DiscordError(`Failed to update channel visibility: ${error.message}`);
 		}
 	}
 
 	async getChannelInfo(channelId) {
 		try {
-			const channel =
-				await discordClient.client.channels.fetch(channelId);
+			const channel = await discordClient.client.channels.fetch(channelId);
 			return {
 				id: channel.id,
 				name: channel.name,
@@ -151,9 +136,7 @@ class DiscordService {
 				guildName: channel.guild.name,
 			};
 		} catch (error) {
-			throw new DiscordError(
-				`Failed to fetch channel info: ${error.message}`
-			);
+			throw new DiscordError(`Failed to fetch channel info: ${error.message}`);
 		}
 	}
 
@@ -169,9 +152,7 @@ class DiscordService {
 					type: channel.type,
 				}));
 		} catch (error) {
-			throw new DiscordError(
-				`Failed to fetch guild channels: ${error.message}`
-			);
+			throw new DiscordError(`Failed to fetch guild channels: ${error.message}`);
 		}
 	}
 
@@ -198,17 +179,10 @@ class DiscordService {
 			for (const [id] of guilds) {
 				try {
 					// Obtener la información completa del guild
-					const fullGuild =
-						await discordClient.client.guilds.fetch(id);
+					const fullGuild = await discordClient.client.guilds.fetch(id);
 
-					if (
-						!fullGuild.id ||
-						!fullGuild.name ||
-						!fullGuild.ownerId
-					) {
-						logger.warn(
-							`Skipping guild with incomplete data: ${fullGuild.id}`
-						);
+					if (!fullGuild.id || !fullGuild.name || !fullGuild.ownerId) {
+						logger.warn(`Skipping guild with incomplete data: ${fullGuild.id}`);
 						continue;
 					}
 
@@ -219,9 +193,7 @@ class DiscordService {
 						ownerId: fullGuild.ownerId,
 					});
 				} catch (error) {
-					logger.error(
-						`Error processing guild ${id}: ${error.message}`
-					);
+					logger.error(`Error processing guild ${id}: ${error.message}`);
 					continue;
 				}
 			}
@@ -233,9 +205,7 @@ class DiscordService {
 			return processedGuilds;
 		} catch (error) {
 			logger.error(`Failed to fetch guild info: ${error.message}`);
-			throw new DiscordError(
-				`Failed to fetch guild info: ${error.message}`
-			);
+			throw new DiscordError(`Failed to fetch guild info: ${error.message}`);
 		}
 	}
 

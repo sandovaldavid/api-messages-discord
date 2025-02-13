@@ -110,8 +110,7 @@ export const guildSchema = {
 				properties: {
 					available: {
 						type: 'boolean',
-						description:
-							'Whether the guild is available on Discord',
+						description: 'Whether the guild is available on Discord',
 					},
 					memberCount: {
 						type: 'number',

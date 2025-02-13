@@ -11,19 +11,7 @@ const getStatusColor = (status) => {
 };
 
 const httpFormat = printf(
-	({
-		timestamp,
-		level,
-		message,
-		method,
-		url,
-		status,
-		responseTime,
-		ip,
-		userAgent,
-		route,
-		error,
-	}) => {
+	({ timestamp, level, message, method, url, status, responseTime, ip, userAgent, route, error }) => {
 		const reset = '\x1b[0m';
 
 		if (method && url) {
@@ -47,11 +35,7 @@ const httpFormat = printf(
 
 const logger = winston.createLogger({
 	level: 'debug',
-	format: combine(
-		timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-		colorize(),
-		httpFormat
-	),
+	format: combine(timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), colorize(), httpFormat),
 	transports: [
 		new winston.transports.Console({
 			level: 'debug',
@@ -60,27 +44,18 @@ const logger = winston.createLogger({
 		new winston.transports.File({
 			filename: 'logs/debug.log',
 			level: 'debug',
-			format: combine(
-				timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-				httpFormat
-			),
+			format: combine(timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), httpFormat),
 		}),
 
 		new winston.transports.File({
 			filename: 'logs/error.log',
 			level: 'error',
-			format: combine(
-				timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-				httpFormat
-			),
+			format: combine(timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), httpFormat),
 		}),
 		new winston.transports.File({
 			filename: 'logs/http.log',
 			level: 'http',
-			format: combine(
-				timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-				httpFormat
-			),
+			format: combine(timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), httpFormat),
 		}),
 		new winston.transports.File({
 			filename: 'logs/combined.log',

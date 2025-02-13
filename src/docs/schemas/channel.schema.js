@@ -36,40 +36,28 @@ export const channelSchema = {
 				properties: {
 					isText: {
 						type: 'boolean',
-						description:
-							'Whether the channel is a text channel (type 0)',
+						description: 'Whether the channel is a text channel (type 0)',
 						example: true,
 					},
 					isVoice: {
 						type: 'boolean',
-						description:
-							'Whether the channel is a voice channel (type 2)',
+						description: 'Whether the channel is a voice channel (type 2)',
 						example: false,
 					},
 					isCategory: {
 						type: 'boolean',
-						description:
-							'Whether the channel is a category (type 4)',
+						description: 'Whether the channel is a category (type 4)',
 						example: false,
 					},
 					isNews: {
 						type: 'boolean',
-						description:
-							'Whether the channel is a news channel (type 5)',
+						description: 'Whether the channel is a news channel (type 5)',
 						example: false,
 					},
 					typeLabel: {
 						type: 'string',
 						description: 'Human-readable channel type',
-						enum: [
-							'text',
-							'dm',
-							'voice',
-							'group',
-							'category',
-							'news',
-							'unknown',
-						],
+						enum: ['text', 'dm', 'voice', 'group', 'category', 'news', 'unknown'],
 						example: 'text',
 					},
 				},
@@ -87,8 +75,7 @@ export const channelSchema = {
 			},
 			displayName: {
 				type: 'string',
-				description:
-					'Formatted channel name including guild (virtual field)',
+				description: 'Formatted channel name including guild (virtual field)',
 				example: 'My Discord Server > general',
 			},
 			createdAt: {

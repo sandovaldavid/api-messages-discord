@@ -1,8 +1,4 @@
-import {
-	APIError,
-	DiscordError,
-	NotFoundError,
-} from '../middleware/errorHandler.js';
+import { APIError, DiscordError, NotFoundError } from '../middleware/errorHandler.js';
 import discordService from '../services/discordService.js';
 import Channel from '../models/channel.js';
 import logger from '../utils/logger.js';
@@ -34,8 +30,7 @@ export const getChannels = async (req, res, next) => {
 			for (const guild of guilds) {
 				try {
 					await retryOperation(async () => {
-						const guildChannels =
-							await discordService.getAllGuildChannels(guild.id);
+						const guildChannels = await discordService.getAllGuildChannels(guild.id);
 
 						const validChannels = guildChannels
 							.map((channel) => ({
@@ -49,30 +44,22 @@ export const getChannels = async (req, res, next) => {
 								try {
 									return validateChannel(channel);
 								} catch (error) {
-									logger.warn(
-										`Invalid channel data: ${error.message}`
-									);
+									logger.warn(`Invalid channel data: ${error.message}`);
 									return false;
 								}
 							});
 
-						const formattedChannels = validChannels.map(
-							(channel) => {
-								const channelDoc = new Channel(channel);
-								return channelDoc.toAPI();
-							}
-						);
+						const formattedChannels = validChannels.map((channel) => {
+							const channelDoc = new Channel(channel);
+							return channelDoc.toAPI();
+						});
 
 						channels.push(...formattedChannels);
 
-						await new Promise((resolve) =>
-							setTimeout(resolve, RATE_LIMIT_DELAY)
-						);
+						await new Promise((resolve) => setTimeout(resolve, RATE_LIMIT_DELAY));
 					});
 				} catch (guildError) {
-					logger.error(
-						`Error fetching channels for guild: ${guildError.message}`
-					);
+					logger.error(`Error fetching channels for guild: ${guildError.message}`);
 				}
 			}
 		}
@@ -83,9 +70,7 @@ export const getChannels = async (req, res, next) => {
 
 		channels.sort((a, b) => {
 			const guildCompare = a.guildName.localeCompare(b.guildName);
-			return guildCompare !== 0
-				? guildCompare
-				: a.name.localeCompare(b.name);
+			return guildCompare !== 0 ? guildCompare : a.name.localeCompare(b.name);
 		});
 
 		res.status(200).json({
@@ -228,9 +213,7 @@ export const getChannelsByGuild = async (req, res, next) => {
 
 		formattedChannels.sort((a, b) => a.name.localeCompare(b.name));
 
-		logger.info(
-			`Retrieved ${formattedChannels.length} channels for guild ${guildInfo.name}`
-		);
+		logger.info(`Retrieved ${formattedChannels.length} channels for guild ${guildInfo.name}`);
 
 		res.status(200).json({
 			status: 'success',
@@ -276,9 +259,7 @@ const retryOperation = async (operation, attempts = RETRY_ATTEMPTS) => {
 			return await operation();
 		} catch (error) {
 			if (i === attempts - 1) throw error;
-			await new Promise((resolve) =>
-				setTimeout(resolve, RETRY_DELAY * (i + 1))
-			);
+			await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY * (i + 1)));
 			logger.warn(`Retry attempt ${i + 1} of ${attempts}`);
 		}
 	}
@@ -302,8 +283,7 @@ export const syncChannels = async (req, res, next) => {
 		for (const guild of guilds) {
 			try {
 				await retryOperation(async () => {
-					const guildChannels =
-						await discordService.getAllGuildChannels(guild.id);
+					const guildChannels = await discordService.getAllGuildChannels(guild.id);
 
 					const validChannels = guildChannels
 						.map((channel) => ({
@@ -317,23 +297,17 @@ export const syncChannels = async (req, res, next) => {
 							try {
 								return validateChannel(channel);
 							} catch (error) {
-								logger.warn(
-									`Invalid channel data: ${error.message}`
-								);
+								logger.warn(`Invalid channel data: ${error.message}`);
 								return false;
 							}
 						});
 
 					channels.push(...validChannels);
 
-					await new Promise((resolve) =>
-						setTimeout(resolve, RATE_LIMIT_DELAY)
-					);
+					await new Promise((resolve) => setTimeout(resolve, RATE_LIMIT_DELAY));
 				});
 			} catch (guildError) {
-				logger.error(
-					`Error fetching channels for guild ${guild.name}: ${guildError.message}`
-				);
+				logger.error(`Error fetching channels for guild ${guild.name}: ${guildError.message}`);
 			}
 		}
 
@@ -342,9 +316,7 @@ export const syncChannels = async (req, res, next) => {
 		}
 
 		totalChannels = channels.length;
-		logger.info(
-			`Processing ${totalChannels} channels in chunks of ${chunkSize}`
-		);
+		logger.info(`Processing ${totalChannels} channels in chunks of ${chunkSize}`);
 
 		const chunkedOperations = [];
 		for (let i = 0; i < channels.length; i += chunkSize) {
@@ -379,23 +351,13 @@ export const syncChannels = async (req, res, next) => {
 					totalModified += result.modifiedCount;
 					totalUpserted += result.upsertedCount;
 
-					progress = Math.round(
-						(((index + 1) * chunkSize) / totalChannels) * 100
-					);
-					logger.info(
-						`Sync progress: ${progress}% (${
-							(index + 1) * chunkSize
-						}/${totalChannels})`
-					);
+					progress = Math.round((((index + 1) * chunkSize) / totalChannels) * 100);
+					logger.info(`Sync progress: ${progress}% (${(index + 1) * chunkSize}/${totalChannels})`);
 				});
 
-				await new Promise((resolve) =>
-					setTimeout(resolve, RATE_LIMIT_DELAY)
-				);
+				await new Promise((resolve) => setTimeout(resolve, RATE_LIMIT_DELAY));
 			} catch (chunkError) {
-				logger.error(
-					`Error processing chunk ${index + 1}: ${chunkError.message}`
-				);
+				logger.error(`Error processing chunk ${index + 1}: ${chunkError.message}`);
 				throw new APIError(`Failed to process chunk ${index + 1}`);
 			}
 		}
@@ -450,25 +412,15 @@ export const updateChannelStatus = async (req, res, next) => {
 		let discordUpdateResult;
 		if (!isActive) {
 			if (action === 'archive') {
-				discordUpdateResult =
-					await discordService.archiveChannel(channelId);
+				discordUpdateResult = await discordService.archiveChannel(channelId);
 			} else {
-				discordUpdateResult = await discordService.hideChannel(
-					channelId,
-					true
-				);
+				discordUpdateResult = await discordService.hideChannel(channelId, true);
 			}
 		} else {
-			discordUpdateResult = await discordService.hideChannel(
-				channelId,
-				false
-			);
+			discordUpdateResult = await discordService.hideChannel(channelId, false);
 		}
 
-		const updatedChannel = await Channel.updateChannelStatus(
-			channelId,
-			isActive
-		);
+		const updatedChannel = await Channel.updateChannelStatus(channelId, isActive);
 
 		if (!updatedChannel) {
 			const channelData = {
@@ -483,9 +435,7 @@ export const updateChannelStatus = async (req, res, next) => {
 			const newChannel = new Channel(channelData);
 			await newChannel.save();
 
-			logger.info(
-				`Created new channel ${channelId} with status ${isActive}`
-			);
+			logger.info(`Created new channel ${channelId} with status ${isActive}`);
 
 			const channelInfo = {
 				...newChannel.toAPI(),
@@ -534,9 +484,7 @@ export const updateChannelStatus = async (req, res, next) => {
 
 		res.status(200).json({
 			status: 'success',
-			message: `Channel ${
-				isActive ? 'activated' : 'deactivated'
-			} and ${action}d`,
+			message: `Channel ${isActive ? 'activated' : 'deactivated'} and ${action}d`,
 			data: {
 				...channelInfo,
 				discord: discordUpdateResult,
@@ -546,19 +494,11 @@ export const updateChannelStatus = async (req, res, next) => {
 		if (error instanceof APIError) {
 			next(error);
 		} else if (error.code === 50013) {
-			next(
-				new DiscordError(
-					'Bot lacks required permissions: MANAGE_CHANNELS, MANAGE_ROLES'
-				)
-			);
+			next(new DiscordError('Bot lacks required permissions: MANAGE_CHANNELS, MANAGE_ROLES'));
 		} else if (error.code === 10003) {
 			next(new NotFoundError('Discord channel not found'));
 		} else if (error.message.includes('Missing Permissions')) {
-			next(
-				new DiscordError(
-					'Bot needs additional permissions to modify this channel'
-				)
-			);
+			next(new DiscordError('Bot needs additional permissions to modify this channel'));
 		} else {
 			logger.error(`Error updating channel status: ${error.message}`);
 			next(new APIError('Error updating channel status', 500));

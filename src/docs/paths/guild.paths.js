@@ -39,8 +39,7 @@ export const guildPaths = {
 	'/api/guilds/sync': {
 		get: {
 			summary: 'Synchronize guilds with Discord',
-			description:
-				'Synchronizes all guilds and their channels from Discord with the local database',
+			description: 'Synchronizes all guilds and their channels from Discord with the local database',
 			security: [{ BearerAuth: [] }],
 			tags: ['Guilds'],
 			responses: {
@@ -76,8 +75,7 @@ export const guildPaths = {
 	'/api/guilds/{guildId}': {
 		get: {
 			summary: 'Get guild by ID',
-			description:
-				'Retrieves detailed information about a specific Discord guild/server',
+			description: 'Retrieves detailed information about a specific Discord guild/server',
 			security: [{ BearerAuth: [] }],
 			tags: ['Guilds'],
 			parameters: [
@@ -159,8 +157,7 @@ export const guildPaths = {
 	'/api/guilds/{guildId}/status': {
 		get: {
 			summary: 'Get guild status',
-			description:
-				'Retrieves the current status of a guild both locally and on Discord',
+			description: 'Retrieves the current status of a guild both locally and on Discord',
 			security: [{ BearerAuth: [] }],
 			tags: ['Guilds'],
 			parameters: [

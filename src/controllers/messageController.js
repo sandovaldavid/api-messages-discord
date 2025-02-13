@@ -17,7 +17,7 @@ export const createMessage = async (req, res, next) => {
 		try {
 			new Date().toLocaleString('en-US', { timeZone: timezone });
 		} catch (error) {
-			throw new APIError('Invalid timezone', 400);
+			throw new APIError(`Invalid timezone: ${error.message}`, 400);
 		}
 
 		const localDate = new Date(scheduledFor);
@@ -25,9 +25,7 @@ export const createMessage = async (req, res, next) => {
 			throw new APIError('Invalid date format', 400);
 		}
 
-		const nowInLocal = new Date(
-			new Date().toLocaleString('en-US', { timeZone: timezone })
-		);
+		const nowInLocal = new Date(new Date().toLocaleString('en-US', { timeZone: timezone }));
 
 		const message = await Message.create({
 			content,
@@ -45,19 +43,12 @@ export const createMessage = async (req, res, next) => {
 
 		if (localDate <= nowInLocal) {
 			try {
-				const sentMessageId = await discordService.sendMessage(
-					message.channelId,
-					message.content
-				);
+				const sentMessageId = await discordService.sendMessage(message.channelId, message.content);
 
 				await message.markAsSent();
-				logger.info(
-					`Message ${message._id} sent immediately with Discord message id: ${sentMessageId}`
-				);
+				logger.info(`Message ${message._id} sent immediately with Discord message id: ${sentMessageId}`);
 			} catch (error) {
-				logger.error(
-					`Failed to send immediate message ${message._id}: ${error.message}`
-				);
+				logger.error(`Failed to send immediate message ${message._id}: ${error.message}`);
 			}
 		}
 
@@ -65,10 +56,7 @@ export const createMessage = async (req, res, next) => {
 			status: 'success',
 			data: {
 				...message.toObject(),
-				formattedScheduledFor: message.getFormattedScheduledFor(
-					'en-US',
-					timezone
-				),
+				formattedScheduledFor: message.getFormattedScheduledFor('en-US', timezone),
 				timezone: timezone,
 				localTime: localDate.toLocaleString('en-US', {
 					timeZone: timezone,
@@ -90,24 +78,17 @@ export const createMessage = async (req, res, next) => {
 
 export const getMessages = async (req, res, next) => {
 	try {
-		const messages = await Message.find()
-			.sort({ scheduledFor: 'asc' })
-			.select('-__v');
+		const messages = await Message.find().sort({ scheduledFor: 'asc' }).select('-__v');
 
 		const enrichedMessages = await Promise.all(
 			messages.map(async (message) => {
-				const formattedScheduledFor =
-					message.getFormattedScheduledFor('en-US');
+				const formattedScheduledFor = message.getFormattedScheduledFor('en-US');
 				let channelInfo = {};
 
 				try {
-					channelInfo = await discordService.getChannelInfo(
-						message.channelId
-					);
+					channelInfo = await discordService.getChannelInfo(message.channelId);
 				} catch (error) {
-					logger.error(
-						`Error fetching channel info for message ${message._id}: ${error.message}`
-					);
+					logger.error(`Error fetching channel info for message ${message._id}: ${error.message}`);
 				}
 
 				return {
@@ -148,17 +129,10 @@ export const deleteMessage = async (req, res, next) => {
 		// Notify cancellation to Discord by sending a cancellation message.
 		// This integration uses the discordService function.
 		try {
-			await discordService.sendMessage(
-				message.channelId,
-				`Scheduled message was cancelled: ${message.content}`
-			);
-			logger.info(
-				`Cancellation notification sent for message ${req.params.id}`
-			);
+			await discordService.sendMessage(message.channelId, `Scheduled message was cancelled: ${message.content}`);
+			logger.info(`Cancellation notification sent for message ${req.params.id}`);
 		} catch (error) {
-			logger.warn(
-				`Failed to send cancellation notification: ${error.message}`
-			);
+			logger.warn(`Failed to send cancellation notification: ${error.message}`);
 		}
 
 		await message.remove();
@@ -210,18 +184,11 @@ export const updateMessage = async (req, res, next) => {
 
 		if (message.scheduledFor <= new Date()) {
 			try {
-				const sentMessageId = await discordService.sendMessage(
-					message.channelId,
-					message.content
-				);
+				const sentMessageId = await discordService.sendMessage(message.channelId, message.content);
 				await message.markAsSent();
-				logger.info(
-					`Message ${message._id} sent with Discord message id: ${sentMessageId}`
-				);
+				logger.info(`Message ${message._id} sent with Discord message id: ${sentMessageId}`);
 			} catch (error) {
-				logger.error(
-					`Failed to send updated message ${message._id}: ${error.message}`
-				);
+				logger.error(`Failed to send updated message ${message._id}: ${error.message}`);
 			}
 		}
 
@@ -230,8 +197,7 @@ export const updateMessage = async (req, res, next) => {
 			status: 'success',
 			data: {
 				...message.toObject(),
-				formattedScheduledFor:
-					message.getFormattedScheduledFor('en-US'),
+				formattedScheduledFor: message.getFormattedScheduledFor('en-US'),
 			},
 		});
 	} catch (error) {
@@ -256,21 +222,16 @@ export const getMessage = async (req, res, next) => {
 
 		let channelInfo = {};
 		try {
-			channelInfo = await discordService.getChannelInfo(
-				message.channelId
-			);
+			channelInfo = await discordService.getChannelInfo(message.channelId);
 		} catch (error) {
-			logger.error(
-				`Error fetching channel info for message ${message._id}: ${error.message}`
-			);
+			logger.error(`Error fetching channel info for message ${message._id}: ${error.message}`);
 		}
 
 		res.status(200).json({
 			status: 'success',
 			data: {
 				...message.toObject(),
-				formattedScheduledFor:
-					message.getFormattedScheduledFor('en-US'),
+				formattedScheduledFor: message.getFormattedScheduledFor('en-US'),
 				channelInfo,
 			},
 		});
@@ -297,18 +258,13 @@ export const getPendingMessages = async (req, res, next) => {
 
 		const enrichedMessages = await Promise.all(
 			messages.map(async (message) => {
-				const formattedScheduledFor =
-					message.getFormattedScheduledFor('en-US');
+				const formattedScheduledFor = message.getFormattedScheduledFor('en-US');
 				let channelInfo = {};
 
 				try {
-					channelInfo = await discordService.getChannelInfo(
-						message.channelId
-					);
+					channelInfo = await discordService.getChannelInfo(message.channelId);
 				} catch (error) {
-					logger.error(
-						`Error fetching channel info for message ${message._id}: ${error.message}`
-					);
+					logger.error(`Error fetching channel info for message ${message._id}: ${error.message}`);
 				}
 
 				return {
@@ -332,27 +288,20 @@ export const getPendingMessages = async (req, res, next) => {
 
 export const getSentMessages = async (req, res, next) => {
 	try {
-		const messages = await Message.find({ sent: true })
-			.sort({ scheduledFor: 'desc' })
-			.select('-__v');
+		const messages = await Message.find({ sent: true }).sort({ scheduledFor: 'desc' }).select('-__v');
 
 		const enrichedMessages = await Promise.all(
 			messages.map(async (message) => {
 				let channelInfo = {};
 				try {
-					channelInfo = await discordService.getChannelInfo(
-						message.channelId
-					);
+					channelInfo = await discordService.getChannelInfo(message.channelId);
 				} catch (error) {
-					logger.error(
-						`Error fetching channel info for message ${message._id}: ${error.message}`
-					);
+					logger.error(`Error fetching channel info for message ${message._id}: ${error.message}`);
 				}
 
 				return {
 					...message.toObject(),
-					formattedScheduledFor:
-						message.getFormattedScheduledFor('en-US'),
+					formattedScheduledFor: message.getFormattedScheduledFor('en-US'),
 					channelInfo,
 				};
 			})

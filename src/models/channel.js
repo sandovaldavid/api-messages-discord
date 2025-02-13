@@ -104,11 +104,7 @@ channelSchema.statics = {
 	},
 
 	async updateChannelStatus(channelId, isActive) {
-		return this.findOneAndUpdate(
-			{ channelId },
-			{ isActive },
-			{ new: true }
-		);
+		return this.findOneAndUpdate({ channelId }, { isActive }, { new: true });
 	},
 };
 
