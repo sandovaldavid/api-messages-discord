@@ -70,6 +70,12 @@ bun run dev
 bun start
 ```
 
+## 📦 Deployment
+
+For detailed deployment instructions:
+
+-   [Desplegar en Heroku](deploy-heroku.es.md)
+
 ## 📚 Documentación de la API
 
 Una vez que el servidor esté en funcionamiento, puedes acceder a la documentación Swagger en:
