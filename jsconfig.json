@@ -6,6 +6,7 @@
 			"@docs/*": ["docs/*"],
 			"@config/*": ["src/config/*"],
 			"@controllers/*": ["src/controllers/*"],
+			"@routes/*": ["src/routes/*"],
 			"@models/*": ["src/models/*"],
 			"@middleware/*": ["src/middleware/*"],
 			"@services/*": ["src/services/*"],
