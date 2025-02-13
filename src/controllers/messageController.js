@@ -5,7 +5,7 @@ import discordService from '../services/discordService.js';
 
 export const createMessage = async (req, res, next) => {
 	try {
-		const { content, scheduledFor, channelId } = req.body;
+		const { content, scheduledFor, channelId, timezone = 'UTC' } = req.body;
 
 		if (!content) {
 			throw new APIError('Message content is required', 400);
@@ -14,20 +14,36 @@ export const createMessage = async (req, res, next) => {
 			throw new APIError('Scheduled date is required', 400);
 		}
 
-		const date = new Date(scheduledFor);
-		if (isNaN(date.getTime())) {
+		try {
+			new Date().toLocaleString('en-US', { timeZone: timezone });
+		} catch (error) {
+			throw new APIError('Invalid timezone', 400);
+		}
+
+		const localDate = new Date(scheduledFor);
+		if (isNaN(localDate.getTime())) {
 			throw new APIError('Invalid date format', 400);
 		}
 
+		const nowInLocal = new Date(
+			new Date().toLocaleString('en-US', { timeZone: timezone })
+		);
+
 		const message = await Message.create({
 			content,
-			scheduledFor: date,
+			scheduledFor: localDate,
 			channelId: channelId || process.env.DISCORD_CHANNEL_ID,
 		});
 
-		logger.info(`Message created with ID: ${message._id}`);
+		logger.info(
+			`Message created with ID: ${message._id} scheduled for ${localDate.toLocaleString('en-US', { timeZone: timezone })} (${timezone})`
+		);
 
-		if (date <= new Date()) {
+		logger.debug(
+			`localDate: ${localDate.toLocaleString('en-US', { timeZone: timezone })}, nowInLocal: ${nowInLocal.toLocaleString('en-US', { timeZone: timezone })}`
+		);
+
+		if (localDate <= nowInLocal) {
 			try {
 				const sentMessageId = await discordService.sendMessage(
 					message.channelId,
@@ -49,8 +65,15 @@ export const createMessage = async (req, res, next) => {
 			status: 'success',
 			data: {
 				...message.toObject(),
-				formattedScheduledFor:
-					message.getFormattedScheduledFor('en-US'),
+				formattedScheduledFor: message.getFormattedScheduledFor(
+					'en-US',
+					timezone
+				),
+				timezone: timezone,
+				localTime: localDate.toLocaleString('en-US', {
+					timeZone: timezone,
+					timeZoneName: 'short',
+				}),
 			},
 		});
 	} catch (error) {
