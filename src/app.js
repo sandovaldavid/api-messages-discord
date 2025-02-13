@@ -5,6 +5,7 @@ import connectDB from './config/database.js';
 import discordClient from './config/discord.js';
 import messageRoutes from './routes/messageRoutes.js';
 import channelRoutes from './routes/channelRoutes.js';
+import guildRoutes from './routes/guildRoutes.js';
 import { errorHandler, APIError } from './middleware/errorHandler.js';
 import { testBotConnection } from './services/messagueService.js';
 import swaggerUi from 'swagger-ui-express';
@@ -44,6 +45,7 @@ app.use(express.json());
 // Routes
 app.use('/api/messages', messageRoutes);
 app.use('/api/channels', channelRoutes);
+app.use('/api/guilds', guildRoutes);
 
 // Error handling
 app.all('*', (req, res, next) => {
