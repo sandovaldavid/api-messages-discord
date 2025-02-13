@@ -186,9 +186,6 @@ class DiscordService {
 			if (guildId) {
 				const guild = await discordClient.client.guilds.fetch(guildId);
 
-				// Añadir log para ver los datos crudos
-				logger.debug('Raw guild data:', guild);
-
 				const guildData = {
 					id: guild.id,
 					name: guild.name,
@@ -196,15 +193,11 @@ class DiscordService {
 					ownerId: guild.ownerId,
 				};
 
-				logger.debug('Processed guild data:', guildData);
 				return guildData;
 			}
 
 			// Obtener todos los guilds
 			const guilds = await discordClient.client.guilds.fetch();
-
-			// Log para ver los guilds sin procesar
-			logger.debug('Raw guilds from Discord:', guilds);
 
 			const processedGuilds = [];
 
@@ -244,7 +237,6 @@ class DiscordService {
 				throw new Error('No valid guilds found');
 			}
 
-			logger.debug('Processed guilds:', processedGuilds);
 			return processedGuilds;
 		} catch (error) {
 			logger.error(`Failed to fetch guild info: ${error.message}`);
