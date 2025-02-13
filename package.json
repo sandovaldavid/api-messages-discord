@@ -12,9 +12,9 @@
     "dev": "bun --watch run src/app.js",
     "test": "bun test",
     "generate-key": "node -e \"import('./src/middleware/auth.js').then(auth => console.log(auth.generateApiKey()))\"",
-    "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json,md}\"",
-    "format:check": "prettier --check \"src/**/*.{js,jsx,ts,tsx,json,md}\"",
-    "lint": "eslint \"src/**/*.{js,jsx,ts,tsx}\"",
+    "format": "bunx prettier --write \"src/**/*.{js,jsx,ts,tsx,json,md}\"",
+    "format:check": "bunx prettier --check \"src/**/*.{js,jsx,ts,tsx,json,md}\"",
+    "lint": "bunx eslint \"src/**/*.{js,jsx,ts,tsx}\"",
     "build": "bun build ./src/app.js --target node --outdir dist"
   },
   "dependencies": {
