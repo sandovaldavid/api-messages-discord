@@ -46,7 +46,7 @@ const httpFormat = printf(
 );
 
 const logger = winston.createLogger({
-	level: 'http',
+	level: 'debug',
 	format: combine(
 		timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
 		colorize(),
@@ -54,8 +54,18 @@ const logger = winston.createLogger({
 	),
 	transports: [
 		new winston.transports.Console({
+			level: 'debug',
 			format: combine(colorize(), httpFormat),
 		}),
+		new winston.transports.File({
+			filename: 'logs/debug.log',
+			level: 'debug',
+			format: combine(
+				timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+				httpFormat
+			),
+		}),
+
 		new winston.transports.File({
 			filename: 'logs/error.log',
 			level: 'error',
