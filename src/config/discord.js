@@ -50,12 +50,16 @@ class DiscordClient {
 				attempts++;
 				if (attempts < maxAttempts) {
 					logger.warn(
-						`Reconnection attempt ${attempts} failed, retrying...`
+						`Reconnection attempt ${attempts} failed, retrying... Error: ${error.message}`
 					);
 					setTimeout(reconnect, 5000 * attempts);
 				} else {
-					logger.error('Max reconnection attempts reached');
-					throw new DiscordError('Failed to reconnect to Discord');
+					logger.error(
+						`Max reconnection attempts reached. Last error: ${error.message}`
+					);
+					throw new DiscordError(
+						`Failed to reconnect to Discord: ${error.message}`
+					);
 				}
 			}
 		};
