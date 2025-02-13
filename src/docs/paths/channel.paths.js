@@ -1,5 +1,3 @@
-import { channelSchema } from '../schemas/channel.schema.js';
-
 export const channelPaths = {
 	'/api/channels': {
 		get: {
