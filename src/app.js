@@ -8,7 +8,7 @@ import messageRoutes from '@routes/messageRoutes.js';
 import channelRoutes from '@routes/channelRoutes.js';
 import guildRoutes from '@routes/guildRoutes.js';
 import { errorHandler, APIError } from '@middleware/errorHandler.js';
-import { testBotConnection } from '@services/messagueService.js';
+import { testBotConnection } from '@/services/messageService.js';
 import swaggerUi from 'swagger-ui-express';
 import { specs } from '@config/swagger.js';
 
