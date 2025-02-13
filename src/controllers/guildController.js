@@ -92,7 +92,6 @@ export const getGuildById = async (req, res, next) => {
 export const syncGuilds = async (req, res, next) => {
 	try {
 		const discordGuilds = await discordService.getGuildInfo();
-		logger.debug('Discord guilds received:', discordGuilds);
 
 		const results = {
 			created: 0,
@@ -102,14 +101,6 @@ export const syncGuilds = async (req, res, next) => {
 
 		for (const guildData of discordGuilds) {
 			try {
-				logger.debug('Processing guild:', guildData);
-
-				logger.debug(`guildData.id: ${guildData.id.toString()}`);
-				logger.debug(`guildData.name: ${guildData.name.toString()}`);
-				logger.debug(
-					`guildData.ownerId: ${guildData.ownerId.toString()}`
-				);
-
 				if (!guildData.id || !guildData.name || !guildData.ownerId) {
 					logger.error('Missing required guild data:', {
 						id: guildData.id,
