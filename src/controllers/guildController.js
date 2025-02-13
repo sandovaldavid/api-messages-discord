@@ -17,7 +17,6 @@ export const getGuilds = async (req, res, next) => {
 			localGuilds.map(async (guild) => {
 				let discordData = {};
 				let guildChannels = guild.channels;
-				console.log('Local Channels Guild in DB: ', guildChannels);
 
 				try {
 					discordData = await discordService.getGuildInfo(
