@@ -2,6 +2,8 @@ import { messageSchema } from './schemas/message.schema.js';
 import { channelSchema } from './schemas/channel.schema.js';
 import { messagePaths } from './paths/message.paths.js';
 import { channelPaths } from './paths/channel.paths.js';
+import { guildSchema } from './schemas/guild.schema.js';
+import { guildPaths } from './paths/guild.paths.js';
 
 export const swaggerConfig = {
 	definition: {
@@ -21,6 +23,7 @@ export const swaggerConfig = {
 			schemas: {
 				...messageSchema,
 				...channelSchema,
+				...guildSchema,
 			},
 			securitySchemes: {
 				BearerAuth: {
@@ -38,6 +41,7 @@ export const swaggerConfig = {
 		paths: {
 			...messagePaths,
 			...channelPaths,
+			...guildPaths,
 		},
 	},
 	apis: [],
@@ -46,6 +50,7 @@ export const swaggerConfig = {
 export const schemas = {
 	messageSchema,
 	channelSchema,
+	guildSchema,
 };
 
 export const paths = {
