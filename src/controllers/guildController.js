@@ -10,29 +10,25 @@ import logger from '../utils/logger.js';
 
 export const getGuilds = async (req, res, next) => {
 	try {
-		// Obtener guilds activos de la DB
 		const localGuilds = await Guild.findActiveGuilds();
-		// Poblar manualmente los canales asociados almacenados en la DB
 		await Guild.populate(localGuilds, { path: 'channels' });
 
 		const enrichedGuilds = await Promise.all(
 			localGuilds.map(async (guild) => {
 				let discordData = {};
-				let guildChannels = guild.channels; // canales locales, podrían estar vacíos
+				let guildChannels = guild.channels;
 				console.log('Local Channels Guild in DB: ', guildChannels);
 
 				try {
-					// Obtener información básica del guild desde Discord
 					discordData = await discordService.getGuildInfo(
 						guild.guildId
 					);
-					// Si no se tienen canales localmente, podemos obtenerlos desde Discord
+
 					if (!guildChannels || guildChannels.length === 0) {
 						const discordChannels =
 							await discordService.getAllGuildChannels(
 								guild.guildId
 							);
-						// Opcional: puedes actualizar el guild local con estos canales usando el método de instancia (ej: addChannel)
 						guildChannels = discordChannels;
 					}
 				} catch (error) {
@@ -42,7 +38,6 @@ export const getGuilds = async (req, res, next) => {
 				}
 				return {
 					...guild.toObject(),
-					// Se asignan los canales obtenidos (ya sea locales o de Discord)
 					channels: guildChannels,
 					summary: guild.getSummary(),
 					shortDescription: guild.shortDescription,
@@ -125,7 +120,6 @@ export const syncGuilds = async (req, res, next) => {
 					throw new Error('Missing required guild data');
 				}
 
-				// Usar el método estático del modelo Guild
 				const guild = await Guild.createOrUpdateGuild({
 					id: guildData.id,
 					name: guildData.name,
@@ -141,7 +135,6 @@ export const syncGuilds = async (req, res, next) => {
 
 				logger.info(`Synchronized guild: ${guild.name}`);
 
-				// Sincronizar canales
 				const discordChannels =
 					await discordService.getAllGuildChannels(guildData.id);
 
