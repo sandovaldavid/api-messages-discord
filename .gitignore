@@ -40,3 +40,7 @@ temp/
 *.swp
 *.swo
 .cache/
+
+# Docker
+docker/development/.env
+docker/**/data
