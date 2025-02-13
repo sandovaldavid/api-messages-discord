@@ -1,68 +1,59 @@
 # Neural Msg - Discord Scheduled Messages API 🤖
 
+<div align="center">
+
 ![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
 ![Node](https://img.shields.io/badge/node-%3E%3D22.13.1-brightgreen)
+![Bun](https://img.shields.io/badge/bun-%3E%3D1.2.0-orange)
 ![License](https://img.shields.io/badge/license-MIT-green)
+[![API Documentation](https://img.shields.io/badge/API-Documentation-blue)](https://api-neural-msg.devprojects.tech/api-docs)
 
-[Versión en Español](README.es.md)
+[English](docs/readme/README.en.md) | [Español](docs/readme/README.es.md)
 
-A RESTful API service that allows scheduling and managing Discord messages through a bot named Neural Msg. Perfect for content planning, announcements, and automated messaging.
+</div>
 
-## 🌟 Features
+## 📖 Documentation
 
--   📅 Schedule messages to be sent at specific times
--   📊 Manage Discord channels and guilds
--   🔄 Sync channels and guilds with Discord
--   📝 Update or cancel scheduled messages
--   🔐 Secure API authentication
--   📋 Comprehensive logging system
+- [API Documentation](https://api-neural-msg.devprojects.tech/api-docs)
+- [Deployment Guide](docs/guides/deployment/deploy-heroku.en.md)
 
-## 🛠️ Prerequisites
+## 🌟 Overview
 
--   Node.js >= 22.13.1
--   Bun >= 1.2.0
--   MongoDB database
--   Discord Bot Token
--   Discord Server with admin privileges
+A RESTful API service for scheduling and managing Discord messages through Neural Msg bot. Perfect for content planning, announcements, and automated messaging.
 
-## ⚙️ Environment Variables
+### Key Features
 
-Create a `.env` file in the root directory with the following variables or review `.env.example`:
+- 📅 Schedule messages with timezone support
+- 📊 Manage Discord channels and guilds
+- 🔄 Automatic synchronization with Discord
+- 📝 CRUD operations for messages
+- 🔐 Secure API authentication
+- 📋 Comprehensive logging system
 
-```env
-PORT=4000
-MONGODB_URI=your_mongodb_connection_string
-DISCORD_TOKEN=your_discord_bot_token
-DISCORD_CHANNEL_ID=default_channel_id
-API_KEY=your_api_key
-API_KEY_SALT=your_api_key_salt
-CHUNK_SIZE=100
-BACKEND_URL=your-backend-url
-FRONTEND_URL=your-frontend-url
-```
+## 🚀 Quick Start
 
-## 🚀 Installation
-
-1. Clone the repository:
+1. **Clone and Install**
 
 ```bash
 git clone https://github.com/sandovaldavid/api-messages-discord.git
 cd api-messages-discord
-```
-
-2. Install dependencies:
-
-```bash
 bun install
 ```
 
-3. Generate API key and API_KEY_SALT:
+2. **Configure Environment**
+
+```bash
+cp .env.example .env
+# Edit .env with your credentials
+```
+
+3. **Generate API Keys**
 
 ```bash
 bun run generate-key
 ```
 
-4. Start the server:
+4. **Start Server**
 
 ```bash
 # Development
@@ -72,83 +63,94 @@ bun run dev
 bun start
 ```
 
-## 📦 Deployment
+## 🛠️ Tech Stack
 
-For detailed deployment instructions:
+- Runtime: [Bun](https://bun.sh/) >= 1.2.0
+- Framework: [Express](https://expressjs.com/)
+- Database: [MongoDB](https://www.mongodb.com/)
+- Discord: [Discord.js](https://discord.js.org/)
+- Documentation: [Swagger](https://swagger.io/)
+- Logging: [Winston](https://github.com/winstonjs/winston)
 
--   [Deploy to Heroku](deploy-heroku.en.md)
+## 📚 API Endpoints
 
-## 📚 API Documentation
+### Messages
 
-Once the server is running, you can access the Swagger documentation at:
+| Method | Endpoint                | Description              |
+| ------ | ----------------------- | ------------------------ |
+| POST   | `/api/messages`         | Create scheduled message |
+| GET    | `/api/messages`         | List all messages        |
+| GET    | `/api/messages/pending` | List pending messages    |
+| GET    | `/api/messages/sent`    | List sent messages       |
+| PATCH  | `/api/messages/:id`     | Update message           |
+| DELETE | `/api/messages/:id`     | Delete message           |
 
-```
-http://localhost:4000/api-docs
-```
+### Channels
 
-### Available Endpoints:
+| Method | Endpoint                          | Description        |
+| ------ | --------------------------------- | ------------------ |
+| GET    | `/api/channels`                   | List all channels  |
+| GET    | `/api/channels/text`              | List text channels |
+| GET    | `/api/channels/sync`              | Sync with Discord  |
+| GET    | `/api/channels/guild/:guildId`    | List by guild      |
+| PATCH  | `/api/channels/:channelId/status` | Update status      |
 
--   📨 Messages
+### Guilds
 
-    -   `POST /api/messages` - Create scheduled message
-    -   `GET /api/messages` - List all messages
-    -   `GET /api/messages/pending` - List pending messages
-    -   `GET /api/messages/sent` - List sent messages
-    -   `PATCH /api/messages/:id` - Update message
-    -   `DELETE /api/messages/:id` - Delete message
-
--   📺 Channels
-
-    -   `GET /api/channels` - List all channels
-    -   `GET /api/channels/text` - List text channels
-    -   `GET /api/channels/sync` - Sync channels with Discord
-    -   `GET /api/channels/guild/:guildId` - List channels by guild
-    -   `GET /api/channels/:channelId` - Get data by channelId
-    -   `PATCH /api/channels/:channelId/status` - Update channel status
-
--   🏰 Guilds
-    -   `GET /api/guilds` - List all guilds
-    -   `GET /api/guilds/sync` - Sync guilds with Discord
-    -   `GET /api/guilds/:guildId` - Get data by guildId
-    -   `GET /api/guilds/:guildId/channels` - List guild channels
-    -   `GET /api/guilds/:guildId/status` - Get status details by guildId
-    -   `PATCH /api/guilds/:guildId/status` - Update guild status
+| Method | Endpoint                        | Description         |
+| ------ | ------------------------------- | ------------------- |
+| GET    | `/api/guilds`                   | List all guilds     |
+| GET    | `/api/guilds/sync`              | Sync with Discord   |
+| GET    | `/api/guilds/:guildId`          | Get guild details   |
+| GET    | `/api/guilds/:guildId/channels` | List guild channels |
+| PATCH  | `/api/guilds/:guildId/status`   | Update guild status |
 
 ## 🔒 Authentication
 
-All API endpoints require authentication using a Bearer token. Include the API key in the Authorization header:
+Use Bearer token authentication:
 
 ```http
 Authorization: Bearer your_api_key
 ```
 
-## 📝 Logging
+## 📝 Logs
 
-Logs are stored in the logs directory:
+Logs are stored in logs:
 
--   `debug.log` - Debug information
--   `error.log` - Error messages
--   `http.log` - HTTP requests
--   `combined.log` - All logs combined
+- `debug.log` - Debug information
+- `error.log` - Error messages
+- `http.log` - HTTP requests
+- `combined.log` - All logs
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+1. Fork it
+2. Create feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit changes (`git commit -m 'Add AmazingFeature'`)
+4. Push branch (`git push origin feature/AmazingFeature`)
+5. Open Pull Request
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+MIT License - see the LICENSE file
 
 ## 👥 Authors
 
--   David Sandoval - Initial work - [@sandovaldavid](https://github.com/sandovaldavid)
+- David Sandoval - [@sandovaldavid](https://github.com/sandovaldavid)
 
 ## 🙏 Acknowledgments
 
--   Discord.js team for their excellent library
--   MongoDB team for the database
--   Express.js community
+- Discord.js team
+- MongoDB team
+- Express.js community
+- Open source community
+
+## 📱 Contact
+
+- GitHub: [@sandovaldavid](https://github.com/sandovaldavid)
+- Email: contact@devsandoval.me
+
+## 🔗 Links
+
+- [API Documentation](https://api-neural-msg.devprojects.tech/api-docs)
+- [GitHub Repository](https://github.com/sandovaldavid/api-messages-discord)
