@@ -452,9 +452,8 @@ export const updateChannelStatus = async (req, res, next) => {
 		let discordUpdateResult;
 		if (!isActive) {
 			if (action === 'archive') {
-				discordUpdateResult = await discordService.archiveChannel(
-					channelId
-				);
+				discordUpdateResult =
+					await discordService.archiveChannel(channelId);
 			} else {
 				discordUpdateResult = await discordService.hideChannel(
 					channelId,

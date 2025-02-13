@@ -6,9 +6,8 @@ class DiscordService {
 	// Message Management
 	async sendMessage(channelId, content) {
 		try {
-			const channel = await discordClient.client.channels.fetch(
-				channelId
-			);
+			const channel =
+				await discordClient.client.channels.fetch(channelId);
 			if (!channel) {
 				throw new NotFoundError('Discord channel');
 			}
@@ -24,9 +23,8 @@ class DiscordService {
 
 	async editMessage(channelId, messageId, newContent) {
 		try {
-			const channel = await discordClient.client.channels.fetch(
-				channelId
-			);
+			const channel =
+				await discordClient.client.channels.fetch(channelId);
 			const message = await channel.messages.fetch(messageId);
 			await message.edit(newContent);
 			logger.info(`Message ${messageId} edited successfully`);
@@ -38,9 +36,8 @@ class DiscordService {
 	// Channel Management
 	async archiveChannel(channelId) {
 		try {
-			const channel = await discordClient.client.channels.fetch(
-				channelId
-			);
+			const channel =
+				await discordClient.client.channels.fetch(channelId);
 
 			if (!channel) {
 				throw new NotFoundError('Discord channel');
@@ -103,9 +100,8 @@ class DiscordService {
 
 	async hideChannel(channelId, hidden = true) {
 		try {
-			const channel = await discordClient.client.channels.fetch(
-				channelId
-			);
+			const channel =
+				await discordClient.client.channels.fetch(channelId);
 			if (!channel) {
 				throw new NotFoundError('Discord channel');
 			}
@@ -145,9 +141,8 @@ class DiscordService {
 
 	async getChannelInfo(channelId) {
 		try {
-			const channel = await discordClient.client.channels.fetch(
-				channelId
-			);
+			const channel =
+				await discordClient.client.channels.fetch(channelId);
 			return {
 				id: channel.id,
 				name: channel.name,
@@ -204,9 +199,8 @@ class DiscordService {
 			for (const [id, guild] of guilds) {
 				try {
 					// Obtener datos completos del guild
-					const fullGuild = await discordClient.client.guilds.fetch(
-						id
-					);
+					const fullGuild =
+						await discordClient.client.guilds.fetch(id);
 
 					if (
 						!fullGuild.id ||
