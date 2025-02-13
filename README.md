@@ -27,7 +27,7 @@ A RESTful API service that allows scheduling and managing Discord messages throu
 
 ## ⚙️ Environment Variables
 
-Create a `.env` file in the root directory with the following variables:
+Create a `.env` file in the root directory with the following variables or review `.env.example`:
 
 ```env
 PORT=4000
@@ -37,6 +37,7 @@ DISCORD_CHANNEL_ID=default_channel_id
 API_KEY=your_api_key
 API_KEY_SALT=your_api_key_salt
 CHUNK_SIZE=100
+BACKEND_URL=your-backend-url
 ```
 
 ## 🚀 Installation
