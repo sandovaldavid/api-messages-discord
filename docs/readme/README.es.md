@@ -1,68 +1,59 @@
 # Neural Msg - API de Mensajes Programados para Discord 🤖
 
+<div align="center">
+
 ![Versión](https://img.shields.io/badge/version-1.0.0-blue.svg)
 ![Node](https://img.shields.io/badge/node-%3E%3D22.13.1-brightgreen)
+![Bun](https://img.shields.io/badge/bun-%3E%3D1.2.0-orange)
 ![Licencia](https://img.shields.io/badge/license-MIT-green)
+[![Documentación API](https://img.shields.io/badge/API-Documentation-blue)](https://api-neural-msg.devprojects.tech/api-docs)
 
-[English Version](README.md)
+[English](README.en.md) | [Español](README.es.md)
 
-Un servicio API RESTful que permite programar y gestionar mensajes de Discord a través de un bot llamado Neural Msg. Perfecto para planificación de contenido, anuncios y mensajería automatizada.
+</div>
 
-## 🌟 Características
+## 📖 Documentación
 
--   📅 Programa mensajes para ser enviados en momentos específicos
--   📊 Gestiona canales y servidores de Discord
--   🔄 Sincroniza canales y servidores con Discord
--   📝 Actualiza o cancela mensajes programados
--   🔐 Autenticación segura de API
--   📋 Sistema completo de registros
+- [Documentación API](https://api-neural-msg.devprojects.tech/api-docs)
+- [Guía de Despliegue](../guides/deployment/deploy-heroku.es.md)
 
-## 🛠️ Requisitos Previos
+## 🌟 Descripción General
 
--   Node.js >= 22.13.1
--   Bun >= 1.2.0
--   Base de datos MongoDB
--   Token de Bot de Discord
--   Servidor de Discord con privilegios de administrador
+Un servicio API RESTful para programar y gestionar mensajes de Discord a través del bot Neural Msg. Perfecto para planificación de contenido, anuncios y mensajería automatizada.
 
-## ⚙️ Variables de Entorno
+### Características Principales
 
-Crea un archivo `.env` en el directorio raíz con las siguientes variables o revise `.env.example`:
+- 📅 Programa mensajes con soporte de zona horaria
+- 📊 Gestiona canales y servidores de Discord
+- 🔄 Sincronización automática con Discord
+- 📝 Operaciones CRUD para mensajes
+- 🔐 Autenticación segura de API
+- 📋 Sistema completo de registros
 
-```env
-PORT=4000
-MONGODB_URI=tu_cadena_de_conexion_mongodb
-DISCORD_TOKEN=tu_token_de_bot_discord
-DISCORD_CHANNEL_ID=id_canal_por_defecto
-API_KEY=tu_clave_api
-API_KEY_SALT=tu_salt_api
-CHUNK_SIZE=100
-BACKEND_URL=your-backend-url
-FRONTEND_URL=your-frontend-url
-```
+## 🚀 Inicio Rápido
 
-## 🚀 Instalación
-
-1. Clona el repositorio:
+1. **Clonar e Instalar**
 
 ```bash
 git clone https://github.com/sandovaldavid/api-messages-discord.git
 cd api-messages-discord
-```
-
-2. Instala las dependencias:
-
-```bash
 bun install
 ```
 
-3. Genera la clave API y API_KEY_SALT:
+2. **Configurar Entorno**
+
+```bash
+cp .env.example .env
+# Edita .env con tus credenciales
+```
+
+3. **Generar Claves API**
 
 ```bash
 bun run generate-key
 ```
 
-4. Inicia el servidor:
+4. **Iniciar Servidor**
 
 ```bash
 # Desarrollo
@@ -72,51 +63,51 @@ bun run dev
 bun start
 ```
 
-## 📦 Deployment
+## 🛠️ Tecnologías Utilizadas
 
-For detailed deployment instructions:
+- Runtime: [Bun](https://bun.sh/) >= 1.2.0
+- Framework: [Express](https://expressjs.com/)
+- Base de Datos: [MongoDB](https://www.mongodb.com/)
+- Discord: [Discord.js](https://discord.js.org/)
+- Documentación: [Swagger](https://swagger.io/)
+- Registros: [Winston](https://github.com/winstonjs/winston)
 
--   [Desplegar en Heroku](deploy-heroku.es.md)
+## 📚 Endpoints de la API
 
-## 📚 Documentación de la API
+### Mensajes
 
-Una vez que el servidor esté en funcionamiento, puedes acceder a la documentación Swagger en:
+| Método | Endpoint                | Descripción                |
+| ------ | ----------------------- | -------------------------- |
+| POST   | `/api/messages`         | Crear mensaje programado   |
+| GET    | `/api/messages`         | Listar todos los mensajes  |
+| GET    | `/api/messages/pending` | Listar mensajes pendientes |
+| GET    | `/api/messages/sent`    | Listar mensajes enviados   |
+| PATCH  | `/api/messages/:id`     | Actualizar mensaje         |
+| DELETE | `/api/messages/:id`     | Eliminar mensaje           |
 
-```
-http://localhost:4000/api-docs
-```
+### Canales
 
-### Endpoints Disponibles:
+| Método | Endpoint                          | Descripción          |
+| ------ | --------------------------------- | -------------------- |
+| GET    | `/api/channels`                   | Listar canales       |
+| GET    | `/api/channels/text`              | Listar canales texto |
+| GET    | `/api/channels/sync`              | Sincronizar Discord  |
+| GET    | `/api/channels/guild/:guildId`    | Listar por servidor  |
+| PATCH  | `/api/channels/:channelId/status` | Actualizar estado    |
 
--   📨 Mensajes
+### Servidores
 
-    -   `POST /api/messages` - Crear mensaje programado
-    -   `GET /api/messages` - Listar todos los mensajes
-    -   `GET /api/messages/pending` - Listar mensajes pendientes
-    -   `GET /api/messages/sent` - Listar mensajes enviados
-    -   `PATCH /api/messages/:id` - Actualizar mensaje
-    -   `DELETE /api/messages/:id` - Eliminar mensaje
-
--   📺 Canales
-
-    -   `GET /api/channels` - Listar todos los canales
-    -   `GET /api/channels/text` - Listar canales de texto
-    -   `GET /api/channels/sync` - Sincronizar canales con Discord
-    -   `GET /api/channels/guild/:guildId` - Listar canales por servidor
-    -   `GET /api/channels/:channelId` - Obtener datos por ID de canal
-    -   `PATCH /api/channels/:channelId/status` - Actualizar estado del canal
-
--   🏰 Servidores
-    -   `GET /api/guilds` - Listar todos los servidores
-    -   `GET /api/guilds/sync` - Sincronizar servidores con Discord
-    -   `GET /api/guilds/:guildId` - Obtener datos por ID de servidor
-    -   `GET /api/guilds/:guildId/channels` - Listar canales del servidor
-    -   `GET /api/guilds/:guildId/status` - Obtener detalles de estado por ID de servidor
-    -   `PATCH /api/guilds/:guildId/status` - Actualizar estado del servidor
+| Método | Endpoint                        | Descripción         |
+| ------ | ------------------------------- | ------------------- |
+| GET    | `/api/guilds`                   | Listar servidores   |
+| GET    | `/api/guilds/sync`              | Sincronizar Discord |
+| GET    | `/api/guilds/:guildId`          | Obtener detalles    |
+| GET    | `/api/guilds/:guildId/channels` | Listar canales      |
+| PATCH  | `/api/guilds/:guildId/status`   | Actualizar estado   |
 
 ## 🔒 Autenticación
 
-Todos los endpoints de la API requieren autenticación usando un token Bearer. Incluye la clave API en el encabezado de Autorización:
+Usa autenticación Bearer token:
 
 ```http
 Authorization: Bearer tu_clave_api
@@ -124,31 +115,42 @@ Authorization: Bearer tu_clave_api
 
 ## 📝 Registros
 
-Los registros se almacenan en el directorio logs:
+Los registros se almacenan en logs:
 
--   `debug.log` - Información de depuración
--   `error.log` - Mensajes de error
--   `http.log` - Solicitudes HTTP
--   `combined.log` - Todos los registros combinados
+- `debug.log` - Información de depuración
+- `error.log` - Mensajes de error
+- `http.log` - Peticiones HTTP
+- `combined.log` - Todos los registros
 
 ## 🤝 Contribuir
 
-1. Haz un Fork del repositorio
-2. Crea tu rama de características (`git checkout -b feature/CaracteristicaIncreible`)
-3. Haz commit de tus cambios (`git commit -m 'Añadir alguna CaracteristicaIncreible'`)
-4. Haz Push a la rama (`git push origin feature/CaracteristicaIncreible`)
+1. Haz un Fork
+2. Crea una rama de funcionalidad (`git checkout -b feature/NuevaFuncionalidad`)
+3. Realiza commits (`git commit -m 'Añadir NuevaFuncionalidad'`)
+4. Sube la rama (`git push origin feature/NuevaFuncionalidad`)
 5. Abre un Pull Request
 
 ## 📄 Licencia
 
-Este proyecto está licenciado bajo la Licencia MIT - ver el archivo LICENSE para más detalles.
+Licencia MIT - ver el archivo LICENSE
 
 ## 👥 Autores
 
--   David Sandoval - Trabajo inicial - [@sandovaldavid](https://github.com/sandovaldavid)
+- David Sandoval - [@sandovaldavid](https://github.com/sandovaldavid)
 
 ## 🙏 Agradecimientos
 
--   Equipo de Discord.js por su excelente librería
--   Equipo de MongoDB por la base de datos
--   Comunidad de Express.js
+- Equipo de Discord.js
+- Equipo de MongoDB
+- Comunidad de Express.js
+- Comunidad de código abierto
+
+## 📱 Contacto
+
+- GitHub: [@sandovaldavid](https://github.com/sandovaldavid)
+- Email: contact@devsandoval.me
+
+## 🔗 Enlaces
+
+- [Documentación API](https://api-neural-msg.devprojects.tech/api-docs)
+- [Repositorio GitHub](https://github.com/sandovaldavid/api-messages-discord)
