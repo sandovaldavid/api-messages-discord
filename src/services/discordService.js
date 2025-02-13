@@ -185,25 +185,83 @@ class DiscordService {
 		try {
 			if (guildId) {
 				const guild = await discordClient.client.guilds.fetch(guildId);
-				return {
+
+				// Añadir log para ver los datos crudos
+				logger.debug('Raw guild data:', guild);
+
+				const guildData = {
 					id: guild.id,
 					name: guild.name,
-					memberCount: guild.memberCount,
-					owner: guild.ownerId,
+					memberCount: guild.memberCount || 0,
+					ownerId: guild.ownerId,
 				};
+
+				logger.debug('Processed guild data:', guildData);
+				return guildData;
 			}
 
+			// Obtener todos los guilds
 			const guilds = await discordClient.client.guilds.fetch();
-			return Array.from(guilds.values()).map((guild) => ({
-				id: guild.id,
-				name: guild.name,
-				memberCount: guild.memberCount,
-				owner: guild.ownerId,
-			}));
+
+			// Log para ver los guilds sin procesar
+			logger.debug('Raw guilds from Discord:', guilds);
+
+			const processedGuilds = [];
+
+			for (const [id, guild] of guilds) {
+				try {
+					// Obtener datos completos del guild
+					const fullGuild = await discordClient.client.guilds.fetch(
+						id
+					);
+
+					if (
+						!fullGuild.id ||
+						!fullGuild.name ||
+						!fullGuild.ownerId
+					) {
+						logger.warn(
+							`Skipping guild with incomplete data: ${fullGuild.id}`
+						);
+						continue;
+					}
+
+					processedGuilds.push({
+						id: fullGuild.id,
+						name: fullGuild.name,
+						memberCount: fullGuild.memberCount || 0,
+						ownerId: fullGuild.ownerId,
+					});
+				} catch (error) {
+					logger.error(
+						`Error processing guild ${id}: ${error.message}`
+					);
+					continue;
+				}
+			}
+
+			if (processedGuilds.length === 0) {
+				throw new Error('No valid guilds found');
+			}
+
+			logger.debug('Processed guilds:', processedGuilds);
+			return processedGuilds;
 		} catch (error) {
+			logger.error(`Failed to fetch guild info: ${error.message}`);
 			throw new DiscordError(
 				`Failed to fetch guild info: ${error.message}`
 			);
+		}
+	}
+
+	async checkBotPermissions() {
+		try {
+			const guilds = await discordClient.client.guilds.fetch();
+			logger.info(`Bot has access to ${guilds.size} guilds`);
+			return true;
+		} catch (error) {
+			logger.error(`Bot permissions check failed: ${error.message}`);
+			return false;
 		}
 	}
 }
