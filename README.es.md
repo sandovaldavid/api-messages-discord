@@ -38,6 +38,7 @@ API_KEY=tu_clave_api
 API_KEY_SALT=tu_salt_api
 CHUNK_SIZE=100
 BACKEND_URL=your-backend-url
+FRONTEND_URL=your-frontend-url
 ```
 
 ## 🚀 Instalación

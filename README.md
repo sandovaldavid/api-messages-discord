@@ -38,6 +38,7 @@ API_KEY=your_api_key
 API_KEY_SALT=your_api_key_salt
 CHUNK_SIZE=100
 BACKEND_URL=your-backend-url
+FRONTEND_URL=your-frontend-url
 ```
 
 ## 🚀 Installation
