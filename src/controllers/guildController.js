@@ -104,11 +104,10 @@ export const syncGuilds = async (req, res, next) => {
 			try {
 				logger.debug('Processing guild:', guildData);
 
-				logger.debug('guildData.id: ', guildData.id.toString());
-				logger.debug('guildData.name: ', guildData.name.toString());
+				logger.debug(`guildData.id: ${guildData.id.toString()}`);
+				logger.debug(`guildData.name: ${guildData.name.toString()}`);
 				logger.debug(
-					'guildData.ownerId: ',
-					guildData.ownerId.toString()
+					`guildData.ownerId: ${guildData.ownerId.toString()}`
 				);
 
 				if (!guildData.id || !guildData.name || !guildData.ownerId) {
