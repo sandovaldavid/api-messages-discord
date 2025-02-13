@@ -1,7 +1,7 @@
-import { messageSchema } from './schemas/message.schema.js';
-import { channelSchema } from './schemas/channel.schema.js';
-import { messagePaths } from './paths/message.paths.js';
-import { channelPaths } from './paths/channel.paths.js';
+import { messageSchema } from '@docs/api/schemas/message.schema.js';
+import { channelSchema } from '@docs/api/schemas/channel.schema.js';
+import { messagePaths } from '@docs/api/paths/message.paths.js';
+import { channelPaths } from '@docs/api/paths/channel.paths.js';
 import { guildSchema } from './schemas/guild.schema.js';
 import { guildPaths } from './paths/guild.paths.js';
 
