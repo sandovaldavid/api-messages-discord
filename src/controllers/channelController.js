@@ -50,7 +50,7 @@ export const getChannels = async (req, res, next) => {
 									return validateChannel(channel);
 								} catch (error) {
 									logger.warn(
-										`Invalid channel data: ${error.message}`
+										`Invalid channel data: ${error.message}`,
 									);
 									return false;
 								}
@@ -60,18 +60,18 @@ export const getChannels = async (req, res, next) => {
 							(channel) => {
 								const channelDoc = new Channel(channel);
 								return channelDoc.toAPI();
-							}
+							},
 						);
 
 						channels.push(...formattedChannels);
 
 						await new Promise((resolve) =>
-							setTimeout(resolve, RATE_LIMIT_DELAY)
+							setTimeout(resolve, RATE_LIMIT_DELAY),
 						);
 					});
 				} catch (guildError) {
 					logger.error(
-						`Error fetching channels for guild: ${guildError.message}`
+						`Error fetching channels for guild: ${guildError.message}`,
 					);
 					continue;
 				}
@@ -230,7 +230,7 @@ export const getChannelsByGuild = async (req, res, next) => {
 		formattedChannels.sort((a, b) => a.name.localeCompare(b.name));
 
 		logger.info(
-			`Retrieved ${formattedChannels.length} channels for guild ${guildInfo.name}`
+			`Retrieved ${formattedChannels.length} channels for guild ${guildInfo.name}`,
 		);
 
 		res.status(200).json({
@@ -278,7 +278,7 @@ const retryOperation = async (operation, attempts = RETRY_ATTEMPTS) => {
 		} catch (error) {
 			if (i === attempts - 1) throw error;
 			await new Promise((resolve) =>
-				setTimeout(resolve, RETRY_DELAY * (i + 1))
+				setTimeout(resolve, RETRY_DELAY * (i + 1)),
 			);
 			logger.warn(`Retry attempt ${i + 1} of ${attempts}`);
 		}
@@ -319,7 +319,7 @@ export const syncChannels = async (req, res, next) => {
 								return validateChannel(channel);
 							} catch (error) {
 								logger.warn(
-									`Invalid channel data: ${error.message}`
+									`Invalid channel data: ${error.message}`,
 								);
 								return false;
 							}
@@ -328,14 +328,13 @@ export const syncChannels = async (req, res, next) => {
 					channels.push(...validChannels);
 
 					await new Promise((resolve) =>
-						setTimeout(resolve, RATE_LIMIT_DELAY)
+						setTimeout(resolve, RATE_LIMIT_DELAY),
 					);
 				});
 			} catch (guildError) {
 				logger.error(
-					`Error fetching channels for guild ${guild.name}: ${guildError.message}`
+					`Error fetching channels for guild ${guild.name}: ${guildError.message}`,
 				);
-				continue;
 			}
 		}
 
@@ -345,7 +344,7 @@ export const syncChannels = async (req, res, next) => {
 
 		totalChannels = channels.length;
 		logger.info(
-			`Processing ${totalChannels} channels in chunks of ${chunkSize}`
+			`Processing ${totalChannels} channels in chunks of ${chunkSize}`,
 		);
 
 		const chunkedOperations = [];
@@ -382,21 +381,21 @@ export const syncChannels = async (req, res, next) => {
 					totalUpserted += result.upsertedCount;
 
 					progress = Math.round(
-						(((index + 1) * chunkSize) / totalChannels) * 100
+						(((index + 1) * chunkSize) / totalChannels) * 100,
 					);
 					logger.info(
 						`Sync progress: ${progress}% (${
 							(index + 1) * chunkSize
-						}/${totalChannels})`
+						}/${totalChannels})`,
 					);
 				});
 
 				await new Promise((resolve) =>
-					setTimeout(resolve, RATE_LIMIT_DELAY)
+					setTimeout(resolve, RATE_LIMIT_DELAY),
 				);
 			} catch (chunkError) {
 				logger.error(
-					`Error processing chunk ${index + 1}: ${chunkError.message}`
+					`Error processing chunk ${index + 1}: ${chunkError.message}`,
 				);
 				throw new APIError(`Failed to process chunk ${index + 1}`);
 			}
@@ -457,19 +456,19 @@ export const updateChannelStatus = async (req, res, next) => {
 			} else {
 				discordUpdateResult = await discordService.hideChannel(
 					channelId,
-					true
+					true,
 				);
 			}
 		} else {
 			discordUpdateResult = await discordService.hideChannel(
 				channelId,
-				false
+				false,
 			);
 		}
 
 		const updatedChannel = await Channel.updateChannelStatus(
 			channelId,
-			isActive
+			isActive,
 		);
 
 		if (!updatedChannel) {
@@ -486,7 +485,7 @@ export const updateChannelStatus = async (req, res, next) => {
 			await newChannel.save();
 
 			logger.info(
-				`Created new channel ${channelId} with status ${isActive}`
+				`Created new channel ${channelId} with status ${isActive}`,
 			);
 
 			const channelInfo = {
@@ -550,16 +549,16 @@ export const updateChannelStatus = async (req, res, next) => {
 		} else if (error.code === 50013) {
 			next(
 				new DiscordError(
-					'Bot lacks required permissions: MANAGE_CHANNELS, MANAGE_ROLES'
-				)
+					'Bot lacks required permissions: MANAGE_CHANNELS, MANAGE_ROLES',
+				),
 			);
 		} else if (error.code === 10003) {
 			next(new NotFoundError('Discord channel not found'));
 		} else if (error.message.includes('Missing Permissions')) {
 			next(
 				new DiscordError(
-					'Bot needs additional permissions to modify this channel'
-				)
+					'Bot needs additional permissions to modify this channel',
+				),
 			);
 		} else {
 			logger.error(`Error updating channel status: ${error.message}`);
