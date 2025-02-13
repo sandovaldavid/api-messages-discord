@@ -27,7 +27,7 @@ export class NotFoundError extends APIError {
 	}
 }
 
-export const errorHandler = (err, req, res, next) => {
+export const errorHandler = (err, req, res) => {
 	err.statusCode = err.statusCode || 500;
 	res.locals.error = err.message;
 
@@ -40,7 +40,7 @@ export const errorHandler = (err, req, res, next) => {
 		logger.error(`${err.name}: ${err.message}`);
 	}
 
-	// Mongose CastError
+	// Mongoose CastError
 	if (err.name === 'ValidationError') {
 		err.statusCode = 400;
 		err.message = Object.values(err.errors)
