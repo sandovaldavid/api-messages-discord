@@ -27,7 +27,7 @@ export class NotFoundError extends APIError {
 	}
 }
 
-export const errorHandler = (err, req, res) => {
+export const errorHandler = (err, req, res, next) => {
 	err.statusCode = err.statusCode || 500;
 	res.locals.error = err.message;
 
