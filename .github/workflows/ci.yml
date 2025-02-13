@@ -34,12 +34,12 @@ jobs:
                   path: |
                       ~/.bun/install/cache
                       node_modules
-                  key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+                  key: ${{ runner.os }}-bun-${{ hashFiles('package.json') }}
                   restore-keys: |
                       ${{ runner.os }}-bun-
 
             - name: Install dependencies
-              run: bun install --frozen-lockfile
+              run: bun install
 
             - name: Check code format
               run: bun run format:check
