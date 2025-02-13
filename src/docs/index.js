@@ -15,14 +15,12 @@ export const swaggerConfig = {
 		},
 		servers: [
 			{
-				url:
-					process.env.NODE_ENV === 'production'
-						? 'https://api-neural-msg.devprojects.tech'
-						: `http://localhost:${process.env.PORT || 4000}`,
-				description:
-					process.env.NODE_ENV === 'production'
-						? 'Production server'
-						: 'Development server',
+				url: 'https://api-neural-msg.devprojects.tech',
+				description: 'Production server',
+			},
+			{
+				url: `http://localhost:${process.env.PORT || 4000}`,
+				description: 'Development server',
 			},
 		],
 		components: {
