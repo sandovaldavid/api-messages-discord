@@ -4,6 +4,8 @@
 ![Node](https://img.shields.io/badge/node-%3E%3D22.13.1-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
+[Versión en Español](README.es.md)
+
 A RESTful API service that allows scheduling and managing Discord messages through a bot named Neural Msg. Perfect for content planning, announcements, and automated messaging.
 
 ## 🌟 Features
