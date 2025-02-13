@@ -7,26 +7,39 @@ const API_KEY_SALT = process.env.API_KEY_SALT;
 
 export const generateApiKey = () => {
 	const randomBytes = crypto.randomBytes(32);
-	const timestamp = Date.now().toString();
 	const salt = crypto.randomBytes(16).toString('hex');
 
-	// Generar el hash del token
 	const hash = crypto
 		.createHash('sha256')
-		.update(randomBytes + timestamp + salt)
+		.update(randomBytes.toString('hex') + salt)
 		.digest('hex');
 
 	logger.info('New API key generated');
 
 	return {
-		token: hash,
+		token: randomBytes.toString('hex'),
 		salt: salt,
+		apiKey: hash,
 		expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
 	};
 };
 
 const verifyToken = (token, salt) => {
-	return crypto.timingSafeEqual(Buffer.from(token), Buffer.from(API_KEY));
+	if (!token || !salt || !API_KEY) {
+		return false;
+	}
+
+	try {
+		const verificationHash = crypto
+			.createHash('sha256')
+			.update(token + salt)
+			.digest('hex');
+
+		return verificationHash === API_KEY;
+	} catch (error) {
+		logger.error(`Token verification error: ${error.message}`);
+		return false;
+	}
 };
 
 export const authenticate = async (req, res, next) => {
