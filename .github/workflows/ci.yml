@@ -1,0 +1,71 @@
+name: CI
+
+on:
+    push:
+        branches: [main]
+    pull_request:
+        branches: [main]
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        strategy:
+            matrix:
+                node-version: [22.x]
+                bun-version: [1.2.x]
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Setup Node.js ${{ matrix.node-version }}
+              uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ matrix.node-version }}
+                  cache: 'bun'
+
+            - name: Setup Bun ${{ matrix.bun-version }}
+              uses: oven-sh/setup-bun@v1
+              with:
+                  bun-version: ${{ matrix.bun-version }}
+
+            - name: Cache dependencies
+              uses: actions/cache@v3
+              with:
+                  path: |
+                      ~/.bun/install/cache
+                      node_modules
+                  key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+                  restore-keys: |
+                      ${{ runner.os }}-bun-
+
+            - name: Install dependencies
+              run: bun install --frozen-lockfile
+
+            - name: Check code format
+              run: bun run format:check
+              continue-on-error: true
+
+            - name: Check code style
+              run: bun run lint
+              continue-on-error: true
+
+            - name: Run tests
+              run: bun test
+              env:
+                  PORT: 4000
+                  MONGODB_URI: ${{ secrets.MONGODB_URI }}
+                  DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+                  DISCORD_CHANNEL_ID: ${{ secrets.DISCORD_CHANNEL_ID }}
+                  API_KEY: ${{ secrets.API_KEY }}
+                  API_KEY_SALT: ${{ secrets.API_KEY_SALT }}
+                  NODE_ENV: test
+
+            - name: Build project
+              run: bun run build
+
+            - name: Upload build artifacts
+              uses: actions/upload-artifact@v3
+              with:
+                  name: build
+                  path: dist/
