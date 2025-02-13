@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { APIError } from './errorHandler.js';
-import logger from '../utils/logger.js';
+import logger from '@utils/logger.js';
 
 const API_KEY = process.env.API_KEY;
 const API_KEY_SALT = process.env.API_KEY_SALT;

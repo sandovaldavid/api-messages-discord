@@ -1,7 +1,7 @@
-import Message from '../models/Message.js';
+import Message from '@models/Message.js';
 import discordService from './discordService.js';
-import discordClient from '../config/discord.js';
-import logger from '../utils/logger.js';
+import discordClient from '@config/discord.js';
+import logger from '@utils/logger.js';
 
 const checkScheduledMessages = async () => {
 	try {

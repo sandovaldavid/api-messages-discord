@@ -1,8 +1,8 @@
-import { APIError, DiscordError, NotFoundError } from '../middleware/errorHandler.js';
-import discordService from '../services/discordService.js';
-import Guild from '../models/Guild.js';
-import Channel from '../models/channel.js';
-import logger from '../utils/logger.js';
+import { APIError, DiscordError, NotFoundError } from '@middleware/errorHandler.js';
+import discordService from '@services/discordService.js';
+import Guild from '@models/Guild.js';
+import Channel from '@models/channel.js';
+import logger from '@utils/logger.js';
 
 export const getGuilds = async (req, res, next) => {
 	try {

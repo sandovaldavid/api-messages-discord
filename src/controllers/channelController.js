@@ -1,7 +1,7 @@
-import { APIError, DiscordError, NotFoundError } from '../middleware/errorHandler.js';
-import discordService from '../services/discordService.js';
-import Channel from '../models/channel.js';
-import logger from '../utils/logger.js';
+import { APIError, DiscordError, NotFoundError } from '@middleware/errorHandler.js';
+import discordService from '@services/discordService.js';
+import Channel from '@models/channel.js';
+import logger from '@utils/logger.js';
 
 // Settings for retrying operations
 const RETRY_ATTEMPTS = 3;

@@ -1,5 +1,5 @@
 import express from 'express';
-import { authenticate } from '../middleware/auth.js';
+import { authenticate } from '@middleware/auth.js';
 import {
 	createMessage,
 	getMessages,
@@ -8,7 +8,7 @@ import {
 	deleteMessage,
 	getPendingMessages,
 	getSentMessages,
-} from '../controllers/messageController.js';
+} from '@controllers/messageController.js';
 
 const router = express.Router();
 

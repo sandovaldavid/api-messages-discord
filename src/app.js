@@ -1,16 +1,16 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import logger from './utils/logger.js';
-import connectDB from './config/database.js';
-import discordClient from './config/discord.js';
-import messageRoutes from './routes/messageRoutes.js';
-import channelRoutes from './routes/channelRoutes.js';
-import guildRoutes from './routes/guildRoutes.js';
-import { errorHandler, APIError } from './middleware/errorHandler.js';
-import { testBotConnection } from './services/messagueService.js';
+import logger from '@utils/logger.js';
+import connectDB from '@config/database.js';
+import discordClient from '@config/discord.js';
+import messageRoutes from '@routes/messageRoutes.js';
+import channelRoutes from '@routes/channelRoutes.js';
+import guildRoutes from '@routes/guildRoutes.js';
+import { errorHandler, APIError } from '@middleware/errorHandler.js';
+import { testBotConnection } from '@services/messagueService.js';
 import swaggerUi from 'swagger-ui-express';
-import { specs } from './config/swagger.js';
+import { specs } from '@config/swagger.js';
 
 dotenv.config();
 

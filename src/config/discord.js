@@ -1,6 +1,6 @@
 import { Client, GatewayIntentBits } from 'discord.js';
-import logger from '../utils/logger.js';
-import { DiscordError } from '../middleware/errorHandler.js';
+import logger from '@utils/logger.js';
+import { DiscordError } from '@middleware/errorHandler.js';
 
 class DiscordClient {
 	constructor() {

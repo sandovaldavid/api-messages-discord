@@ -1,7 +1,7 @@
-import Message from '../models/Message.js';
-import { APIError, NotFoundError } from '../middleware/errorHandler.js';
-import logger from '../utils/logger.js';
-import discordService from '../services/discordService.js';
+import Message from '@models/Message.js';
+import { APIError, NotFoundError } from '@middleware/errorHandler.js';
+import logger from '@utils/logger.js';
+import discordService from '@services/discordService.js';
 
 export const createMessage = async (req, res, next) => {
 	try {

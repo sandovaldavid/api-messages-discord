@@ -1,6 +1,6 @@
-import logger from '../utils/logger.js';
-import { DiscordError, NotFoundError } from '../middleware/errorHandler.js';
-import discordClient from '../config/discord.js';
+import logger from '@utils/logger.js';
+import { DiscordError, NotFoundError } from '@middleware/errorHandler.js';
+import discordClient from '@config/discord.js';
 
 class DiscordService {
 	// Message Management

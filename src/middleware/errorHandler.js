@@ -1,4 +1,4 @@
-import logger from '../utils/logger.js';
+import logger from '@utils/logger.js';
 
 // Customized error class
 export class APIError extends Error {
