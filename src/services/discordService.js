@@ -193,12 +193,11 @@ class DiscordService {
 
 			// Obtener todos los guilds
 			const guilds = await discordClient.client.guilds.fetch();
-
 			const processedGuilds = [];
 
-			for (const [id, guild] of guilds) {
+			for (const [id] of guilds) {
 				try {
-					// Obtener datos completos del guild
+					// Obtener la información completa del guild
 					const fullGuild =
 						await discordClient.client.guilds.fetch(id);
 
