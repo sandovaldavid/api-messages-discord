@@ -27,7 +27,7 @@ Un servicio API RESTful que permite programar y gestionar mensajes de Discord a 
 
 ## ⚙️ Variables de Entorno
 
-Crea un archivo `.env` en el directorio raíz con las siguientes variables:
+Crea un archivo `.env` en el directorio raíz con las siguientes variables o revise `.env.example`:
 
 ```env
 PORT=4000
@@ -37,6 +37,7 @@ DISCORD_CHANNEL_ID=id_canal_por_defecto
 API_KEY=tu_clave_api
 API_KEY_SALT=tu_salt_api
 CHUNK_SIZE=100
+BACKEND_URL=your-backend-url
 ```
 
 ## 🚀 Instalación
