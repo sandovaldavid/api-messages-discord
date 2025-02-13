@@ -43,11 +43,9 @@ jobs:
 
             - name: Check code format
               run: bun run format:check
-              continue-on-error: true
 
             - name: Check code style
               run: bun run lint
-              continue-on-error: true
 
             - name: Run tests
               run: bun test
