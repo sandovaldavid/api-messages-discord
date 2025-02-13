@@ -73,7 +73,6 @@ export const getChannels = async (req, res, next) => {
 					logger.error(
 						`Error fetching channels for guild: ${guildError.message}`,
 					);
-					continue;
 				}
 			}
 		}
