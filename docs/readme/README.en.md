@@ -15,8 +15,8 @@
 ## 📖 Documentation
 
 - [API Documentation](https://api-neural-msg.devprojects.tech/api-docs)
-- [Deployment Guide in Heroku](docs/guides/deployment/deploy-heroku.en.md)
-- [Deployment Guide in Docker](docs/guides/development/deploy-docker.en.md)
+- [Deployment Guide in Heroku](../guides/deployment/deploy-heroku.en.md)
+- [Deployment Guide in Docker](../guides/development/deploy-docker.en.md)
 
 ## 🌟 Overview
 
