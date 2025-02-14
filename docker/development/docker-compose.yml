@@ -1,0 +1,51 @@
+services:
+    dev-api:
+        build:
+            context: ../../
+            dockerfile: Dockerfile
+        container_name: neural-msg-api-dev
+        env_file:
+            - .env
+        ports:
+            - '${PORT}:${PORT}'
+        environment:
+            - NODE_ENV=development
+            - PORT=${PORT}
+            - MONGODB_URI=mongodb://${MONGO_USER}:${MONGO_PASSWORD}@dev-mongo:27017/${MONGO_DATABASE}?authSource=admin
+            - DISCORD_TOKEN=${DISCORD_TOKEN}
+            - DISCORD_CHANNEL_ID=${DISCORD_CHANNEL_ID}
+            - API_KEY=${API_KEY}
+            - API_KEY_SALT=${API_KEY_SALT}
+        volumes:
+            - ../../:/app
+            - node_modules:/app/node_modules
+        depends_on:
+            - dev-mongo
+        networks:
+            - neural-msg-dev
+
+    dev-mongo:
+        image: mongo:latest
+        container_name: neural-msg-mongo-dev
+        env_file:
+            - .env
+        ports:
+            - '27017:27017'
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+            MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+            MONGO_INITDB_DATABASE: ${MONGO_DATABASE}
+        volumes:
+            - mongodb_data:/data/db
+        networks:
+            - neural-msg-dev
+
+networks:
+    neural-msg-dev:
+        driver: bridge
+
+volumes:
+    mongodb_data:
+        driver: local
+    node_modules:
+        driver: local
