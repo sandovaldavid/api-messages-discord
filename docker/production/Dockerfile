@@ -2,13 +2,12 @@ FROM oven/bun:1.2.0
 
 WORKDIR /app
 
-COPY ../../package.json ./
+COPY package.json ./
 
 RUN bun install
 
-COPY ../../ .
+COPY . .
 
 ENV PORT=4000
-ENV NODE_ENV=production
 
 CMD ["bun", "start"]
