@@ -2,10 +2,10 @@ services:
     dev-api:
         build:
             context: ../../
-            dockerfile: Dockerfile
+            dockerfile: docker/development/Dockerfile
         container_name: neural-msg-api-dev
         env_file:
-            - .env
+            - ../../.env
         ports:
             - '${PORT}:${PORT}'
         environment:
@@ -28,7 +28,7 @@ services:
         image: mongo:latest
         container_name: neural-msg-mongo-dev
         env_file:
-            - .env
+            - ../../.env
         ports:
             - '27017:27017'
         environment:
