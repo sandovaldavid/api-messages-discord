@@ -59,6 +59,19 @@ app.use((req, res, next) => {
 app.use(express.json());
 
 // Routes
+app.get('/', (req, res) => {
+	res.status(200).json({
+		status: 'success',
+		message: 'Neural Msg API',
+		version: '1.0.0',
+		docs: '/api-docs',
+		endpoints: {
+			messages: '/api/messages',
+			channels: '/api/channels',
+			guilds: '/api/guilds',
+		},
+	});
+});
 app.use('/api/messages', messageRoutes);
 app.use('/api/channels', channelRoutes);
 app.use('/api/guilds', guildRoutes);
