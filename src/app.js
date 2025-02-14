@@ -11,6 +11,11 @@ import { errorHandler, APIError } from '@middleware/errorHandler.js';
 import { testBotConnection } from '@/services/messageService.js';
 import swaggerUi from 'swagger-ui-express';
 import { specs } from '@config/swagger.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
@@ -44,6 +49,8 @@ app.use(
 	})
 );
 
+app.use(express.static(path.join(__dirname, '../public')));
+
 // Middleware para logging HTTP
 app.use((req, res, next) => {
 	const start = Date.now();
@@ -59,12 +66,17 @@ app.use((req, res, next) => {
 app.use(express.json());
 
 // Routes
+app.get('/favicon.ico', (req, res) => {
+	res.sendFile(path.join(__dirname, '../public/favicon.ico'));
+});
+
 app.get('/', (req, res) => {
 	res.status(200).json({
 		status: 'success',
 		message: 'Neural Msg API',
 		version: '1.0.0',
 		docs: '/api-docs',
+		favicon: '/favicon.ico',
 		endpoints: {
 			messages: '/api/messages',
 			channels: '/api/channels',
