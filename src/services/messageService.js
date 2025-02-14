@@ -5,18 +5,17 @@ import logger from '@utils/logger.js';
 
 const checkScheduledMessages = async () => {
 	try {
-		const now = new Date();
+		const nowUTC = new Date();
 		const messages = await Message.find({
-			scheduledFor: { $lte: now },
+			scheduledFor: { $lte: nowUTC },
 			sent: false,
 		});
 
 		for (const message of messages) {
 			try {
 				await discordService.sendMessage(message.channelId, message.content);
-				message.sent = true;
-				await message.save();
-				logger.info(`Sent scheduled message: ${message._id}`);
+				await message.markAsSent();
+				logger.info(`Sent scheduled message: ${message._id} at ${nowUTC.toISOString()}`);
 			} catch (error) {
 				logger.error(`Failed to send message ${message._id}: ${error.message}`);
 			}

@@ -5,7 +5,7 @@ import discordService from '@services/discordService.js';
 
 export const createMessage = async (req, res, next) => {
 	try {
-		const { content, scheduledFor, channelId, timezone = 'UTC' } = req.body;
+		const { content, scheduledFor, channelId } = req.body;
 
 		if (!content) {
 			throw new APIError('Message content is required', 400);
@@ -14,37 +14,23 @@ export const createMessage = async (req, res, next) => {
 			throw new APIError('Scheduled date is required', 400);
 		}
 
-		try {
-			new Date().toLocaleString('en-US', { timeZone: timezone });
-		} catch (error) {
-			throw new APIError(`Invalid timezone: ${error.message}`, 400);
+		const scheduledDate = new Date(scheduledFor);
+		if (isNaN(scheduledDate.getTime())) {
+			throw new APIError('Invalid date format. Must be in UTC format (ISO 8601)', 400);
 		}
-
-		const localDate = new Date(scheduledFor);
-		if (isNaN(localDate.getTime())) {
-			throw new APIError('Invalid date format', 400);
-		}
-
-		const nowInLocal = new Date(new Date().toLocaleString('en-US', { timeZone: timezone }));
 
 		const message = await Message.create({
 			content,
-			scheduledFor: localDate,
+			scheduledFor: scheduledDate,
 			channelId: channelId || process.env.DISCORD_CHANNEL_ID,
 		});
 
-		logger.info(
-			`Message created with ID: ${message._id} scheduled for ${localDate.toLocaleString('en-US', { timeZone: timezone })} (${timezone})`
-		);
+		logger.info(`Message created with ID: ${message._id} scheduled for ${scheduledDate.toISOString()}`);
 
-		logger.debug(
-			`localDate: ${localDate.toLocaleString('en-US', { timeZone: timezone })}, nowInLocal: ${nowInLocal.toLocaleString('en-US', { timeZone: timezone })}`
-		);
-
-		if (localDate <= nowInLocal) {
+		const nowUTC = new Date();
+		if (scheduledDate <= nowUTC) {
 			try {
 				const sentMessageId = await discordService.sendMessage(message.channelId, message.content);
-
 				await message.markAsSent();
 				logger.info(`Message ${message._id} sent immediately with Discord message id: ${sentMessageId}`);
 			} catch (error) {
@@ -56,12 +42,7 @@ export const createMessage = async (req, res, next) => {
 			status: 'success',
 			data: {
 				...message.toObject(),
-				formattedScheduledFor: message.getFormattedScheduledFor('en-US', timezone),
-				timezone: timezone,
-				localTime: localDate.toLocaleString('en-US', {
-					timeZone: timezone,
-					timeZoneName: 'short',
-				}),
+				scheduledFor: message.scheduledFor.toISOString(),
 			},
 		});
 	} catch (error) {
@@ -78,7 +59,7 @@ export const createMessage = async (req, res, next) => {
 
 export const getMessages = async (req, res, next) => {
 	try {
-		const messages = await Message.find().sort({ scheduledFor: 'asc' }).select('-__v');
+		const messages = await Message.find().sort({ scheduledFor: 'desc' }).select('-__v');
 
 		const enrichedMessages = await Promise.all(
 			messages.map(async (message) => {
