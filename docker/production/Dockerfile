@@ -2,11 +2,9 @@ FROM oven/bun:1.2.0
 
 WORKDIR /app
 
-COPY package.json ./
-
-RUN bun install --frozen-lockfile
-
 COPY . .
+
+RUN bun install
 
 ENV PORT=4000
 
