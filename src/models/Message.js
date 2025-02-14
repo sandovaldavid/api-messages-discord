@@ -47,17 +47,8 @@ messageSchema.methods.reschedule = async function (newTime) {
 	return this;
 };
 
-messageSchema.methods.getFormattedScheduledFor = function (locale = 'en-US', timezone = 'UTC') {
-	return this.scheduledFor.toLocaleString(locale, {
-		timeZone: timezone,
-		weekday: 'long',
-		year: 'numeric',
-		month: 'long',
-		day: 'numeric',
-		hour: '2-digit',
-		minute: '2-digit',
-		timeZoneName: 'short',
-	});
+messageSchema.methods.getFormattedScheduledFor = function () {
+	return this.scheduledFor.toISOString();
 };
 
 messageSchema.statics.findPending = function () {
