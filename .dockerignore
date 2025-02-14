@@ -2,4 +2,7 @@ node_modules
 npm-debug.log
 .git
 .gitignore
+.env
 logs/
+.idea/
+*.md

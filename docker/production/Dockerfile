@@ -9,4 +9,6 @@ RUN bun install
 COPY . .
 
 ENV PORT=4000
+ENV NODE_ENV=production
+
 CMD ["bun", "start"]
